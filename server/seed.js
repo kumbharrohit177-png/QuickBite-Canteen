@@ -234,7 +234,7 @@ const sampleItems = [
         category: 'Snacks',
         available: true,
         description: 'Flattened rice cooked with turmeric, onions, and peanuts.',
-        image: 'https://images.unsplash.com/photo-1596450518349-3ae85a3c617b?auto=format&fit=crop&q=80&w=500', // Placeholder
+        image: '/images/poha.jpg.jpeg', // Updated to local image
         isVeg: true
     },
 

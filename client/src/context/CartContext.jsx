@@ -6,12 +6,30 @@ export function CartProvider({ children }) {
     const [cart, setCart] = useState([]);
 
     const addToCart = (item) => {
+        const itemId = item._id || item.id;
         setCart(prev => {
-            const existing = prev.find(i => i.id === item.id);
+            const existing = prev.find(i => i.id === itemId);
             if (existing) {
-                return prev.map(i => i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i);
+                return prev.map(i => i.id === itemId ? { ...i, quantity: i.quantity + 1 } : i);
             }
-            return [...prev, { ...item, quantity: 1 }];
+            return [...prev, { ...item, id: itemId, quantity: 1 }];
+        });
+    };
+
+    const addMultipleToCart = (items) => {
+        setCart(prev => {
+            const newCart = [...prev];
+            items.forEach(item => {
+                const itemId = item._id || item.id;
+                const newItem = { ...item, id: itemId };
+                const existingIndex = newCart.findIndex(i => i.id === itemId);
+                if (existingIndex > -1) {
+                    newCart[existingIndex].quantity += newItem.quantity;
+                } else {
+                    newCart.push(newItem);
+                }
+            });
+            return newCart;
         });
     };
 
@@ -35,7 +53,7 @@ export function CartProvider({ children }) {
     const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
 
     return (
-        <CartContext.Provider value={{ cart, addToCart, removeFromCart, updateQuantity, clearCart, totalAmount, totalItems }}>
+        <CartContext.Provider value={{ cart, addToCart, addMultipleToCart, removeFromCart, updateQuantity, clearCart, totalAmount, totalItems }}>
             {children}
         </CartContext.Provider>
     );

@@ -87,4 +87,30 @@ router.put('/:id/status', async (req, res) => {
     }
 });
 
+// @route   PUT /api/orders/:id/cancel
+// @desc    Cancel a pending order
+router.put('/:id/cancel', auth, async (req, res) => {
+    try {
+        let order = await Order.findById(req.params.id);
+        if (!order) return res.status(404).json({ msg: 'Order not found' });
+
+        // Check user
+        if (order.user.toString() !== req.user.id) {
+            return res.status(401).json({ msg: 'Not authorized' });
+        }
+
+        // Check status
+        if (order.status !== 'Pending') {
+            return res.status(400).json({ msg: 'Cannot cancel order that is being prepared' });
+        }
+
+        order.status = 'Cancelled';
+        await order.save();
+        res.json(order);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server Error');
+    }
+});
+
 module.exports = router;

@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LogIn, Key, Mail, AlertCircle } from 'lucide-react';
 import { GoogleLogin } from '@react-oauth/google';
+import toast from 'react-hot-toast';
 
 export default function Login() {
     const [email, setEmail] = useState('');
@@ -19,9 +20,11 @@ export default function Login() {
         const res = await login(email, password);
         setLoading(false);
         if (res.success) {
+            toast.success("Welcome back! 👋");
             navigate('/menu');
         } else {
             setError(res.message);
+            toast.error(res.message);
         }
     };
 
@@ -81,6 +84,12 @@ export default function Login() {
                             </div>
                         </div>
 
+                        <div className="flex justify-end">
+                            <a href="#" onClick={(e) => { e.preventDefault(); alert("Feature coming soon!"); }} className="text-sm font-bold text-gray-400 hover:text-primary transition-colors">
+                                Forgot Password?
+                            </a>
+                        </div>
+
                         <button
                             type="submit"
                             disabled={loading}
@@ -101,7 +110,7 @@ export default function Login() {
                         <div className="h-px bg-gray-200 flex-1"></div>
                     </div>
 
-                    <div className="flex justify-center">
+                    <div className="flex justify-center flex-col items-center gap-2">
                         <GoogleLogin
                             onSuccess={async (credentialResponse) => {
                                 console.log("Google Login Success (Frontend):", credentialResponse);
@@ -118,7 +127,7 @@ export default function Login() {
                             }}
                             onError={() => {
                                 console.error("Google Login Failed (Popup level)");
-                                setError('Google Login Failed');
+                                setError('Google Login Failed. Check console for details.');
                             }}
                             shape="circle"
                             size="large"

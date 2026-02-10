@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { UserPlus, User, Mail, Key, AlertCircle } from 'lucide-react';
 import { GoogleLogin } from '@react-oauth/google';
+import toast from 'react-hot-toast';
 
 export default function Signup() {
     const [name, setName] = useState('');
@@ -20,10 +21,11 @@ export default function Signup() {
         const res = await signup(name, email, password);
         setLoading(false);
         if (res.success) {
-            alert("Account created successfully! Please login.");
+            toast.success("Account created! Please login. 🎉");
             navigate('/login');
         } else {
             setError(res.message);
+            toast.error(res.message);
         }
     };
 

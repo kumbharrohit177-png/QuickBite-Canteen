@@ -1,10 +1,8 @@
 
 export default function TimeSlotPicker({ selectedSlot, onSelect }) {
-    // Generate slots from 11:00 AM to 3:00 PM
+    // Generate slots from 1:00 PM to 1:45 PM
     const slots = [
-        "11:00 - 11:15", "11:15 - 11:30", "11:30 - 11:45", "11:45 - 12:00",
-        "12:00 - 12:15", "12:15 - 12:30", "12:30 - 12:45", "12:45 - 01:00",
-        "01:00 - 01:15", "01:15 - 01:30", "01:30 - 01:45", "01:45 - 02:00",
+        "1:00 - 1:15", "1:15 - 1:30", "1:30 - 1:45"
     ];
 
     return (

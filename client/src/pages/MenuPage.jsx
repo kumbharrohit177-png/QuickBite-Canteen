@@ -1,21 +1,27 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import FoodCard from '../components/FoodCard';
 import { useCart } from '../context/CartContext';
-import { ShoppingCart, Search, ArrowUpDown, Loader } from 'lucide-react';
+import { ShoppingCart, Search, Filter, X, ChevronRight, ChevronLeft, Sparkles, Loader } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../api/axios';
 
-const CATEGORIES = ['All', 'Snacks', 'Lunch', 'South Indian', 'Beverages'];
+const CATEGORIES = ['All', 'Snacks', 'Lunch', 'South Indian', 'Beverages', 'Chinese', 'Continental', 'Desserts'];
 
 export default function MenuPage() {
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [searchQuery, setSearchQuery] = useState('');
-    const [sortBy, setSortBy] = useState(''); // 'price-asc', 'price-desc'
-    const { addToCart, totalItems } = useCart();
-
+    const [onlyVeg, setOnlyVeg] = useState(false);
+    const [showFilters, setShowFilters] = useState(false);
+    const [sortBy, setSortBy] = useState('recommended');
+    const [priceRange, setPriceRange] = useState('all');
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 12;
     const [menuItems, setMenuItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const { totalItems, totalAmount } = useCart();
+
+    const categoryScrollRef = useRef(null);
 
     useEffect(() => {
         const fetchMenu = async () => {
@@ -24,140 +30,354 @@ export default function MenuPage() {
                 setMenuItems(res.data);
                 setLoading(false);
             } catch (err) {
-                console.error("Error fetching menu:", err);
-                setError('Failed to load menu. Please try again later.');
+                console.error("Failed to fetch menu:", err);
+                setError("Failed to load menu. Please make sure server is running.");
                 setLoading(false);
             }
         };
-
         fetchMenu();
     }, []);
 
     const filteredItems = menuItems.filter(item => {
         const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
         const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesCategory && matchesSearch;
+        const matchesVeg = !onlyVeg || item.isVeg;
+        const matchesAvailability = item.available !== false;
+
+        // Price Filter
+        let matchesPrice = true;
+        if (priceRange === 'under100') matchesPrice = item.price < 100;
+        else if (priceRange === '100to200') matchesPrice = item.price >= 100 && item.price <= 200;
+        else if (priceRange === 'above200') matchesPrice = item.price > 200;
+
+        return matchesCategory && matchesSearch && matchesVeg && matchesAvailability && matchesPrice;
     }).sort((a, b) => {
-        if (sortBy === 'price-asc') return a.price - b.price;
-        if (sortBy === 'price-desc') return b.price - a.price;
-        return 0;
+        if (sortBy === 'priceLow') return a.price - b.price;
+        if (sortBy === 'priceHigh') return b.price - a.price;
+        return 0; // recommended (default order)
     });
 
+    // Pagination Logic
+    const totalPages = Math.ceil(filteredItems.length / itemsPerPage);
+    const currentItems = filteredItems.slice(
+        (currentPage - 1) * itemsPerPage,
+        currentPage * itemsPerPage
+    );
+
+    // Reset to first page when filters change
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [selectedCategory, searchQuery, onlyVeg, sortBy, priceRange]);
+
+    const renderPaginationButtons = () => {
+        const pages = [];
+        if (totalPages <= 7) {
+            for (let i = 1; i <= totalPages; i++) pages.push(i);
+        } else {
+            if (currentPage <= 4) {
+                pages.push(1, 2, 3, 4, 5, '...', totalPages);
+            } else if (currentPage >= totalPages - 3) {
+                pages.push(1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+            } else {
+                pages.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+            }
+        }
+
+        return pages.map((page, index) => (
+            page === '...' ? (
+                <span key={`ellipsis-${index}`} className="w-10 h-10 flex items-center justify-center text-gray-400">...</span>
+            ) : (
+                <button
+                    key={page}
+                    onClick={() => setCurrentPage(page)}
+                    className={`w-10 h-10 rounded-xl font-bold text-sm transition-all ${currentPage === page
+                        ? 'bg-primary text-white shadow-lg shadow-primary/25'
+                        : 'text-gray-600 hover:bg-gray-50'
+                        }`}
+                >
+                    {page}
+                </button>
+            )
+        ));
+    };
+
+    const scrollCategories = (direction) => {
+        if (categoryScrollRef.current) {
+            const scrollAmount = 200;
+            categoryScrollRef.current.scrollBy({
+                left: direction === 'left' ? -scrollAmount : scrollAmount,
+                behavior: 'smooth'
+            });
+        }
+    };
+
     return (
-        <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8 pb-32">
-            <div className="text-center mb-12">
-                <h1 className="text-5xl font-extrabold text-gray-800 mb-4 animate-fade-in tracking-tight">
-                    <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-amber-500">Delicious</span> Menu
-                </h1>
-                <p className="text-gray-500 text-lg max-w-2xl mx-auto animate-fade-in delay-100">
-                    Explore our wide range of freshly prepared dishes, snacks, and beverages.
-                </p>
+        <div className="min-h-screen bg-gray-50/50 pb-32 font-sans">
+            {/* Sticky Header */}
+            <div className="bg-white/80 backdrop-blur-md sticky top-0 z-50 border-b border-gray-100 shadow-sm transition-all duration-300">
+                <div className="max-w-7xl mx-auto px-4 py-4">
+                    {/* Top Row: Title & Cart */}
+                    <div className="flex items-center justify-between mb-4">
+                        <div className="flex items-center gap-2">
+                            <div className="bg-primary/10 p-2 rounded-xl">
+                                <Sparkles className="w-6 h-6 text-primary" />
+                            </div>
+                            <div>
+                                <h1 className="text-2xl font-black text-gray-900 tracking-tight">Our Menu</h1>
+                                <p className="text-xs text-gray-500 font-bold uppercase tracking-wider">{filteredItems.length} items</p>
+                            </div>
+                        </div>
+
+
+                    </div>
+
+                    {/* Middle Row: Search & Veg Toggle */}
+                    <div className="flex flex-col sm:flex-row gap-3">
+                        <div className="relative flex-grow group">
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-primary transition-colors" />
+                            <input
+                                type="text"
+                                placeholder="Search for food..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                className="w-full pl-12 pr-10 py-3 bg-gray-100/50 border-none rounded-2xl focus:bg-white focus:ring-2 focus:ring-primary/20 transition-all font-medium placeholder:text-gray-400"
+                            />
+                            {searchQuery && (
+                                <button
+                                    onClick={() => setSearchQuery('')}
+                                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 bg-gray-200/50 rounded-full p-1"
+                                >
+                                    <X className="w-4 h-4" />
+                                </button>
+                            )}
+                        </div>
+
+                        <label className="flex items-center gap-3 cursor-pointer group bg-white border border-gray-100 px-4 py-2.5 rounded-2xl shadow-sm hover:bg-gray-50 transition-all select-none relative overflow-hidden">
+                            <span className={`font-bold text-sm transition-colors z-10 ${onlyVeg ? 'text-green-600' : 'text-gray-500'}`}>Veg Only</span>
+                            <div className="relative z-10">
+                                <input
+                                    type="checkbox"
+                                    className="sr-only"
+                                    checked={onlyVeg}
+                                    onChange={() => setOnlyVeg(!onlyVeg)}
+                                />
+                                <div className={`w-11 h-6 rounded-full shadow-inner transition-colors duration-300 ${onlyVeg ? 'bg-green-500' : 'bg-gray-200'}`}></div>
+                                <div className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full shadow-md transition-transform duration-300 ${onlyVeg ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                            </div>
+                            {onlyVeg && <div className="absolute inset-0 bg-green-50 opacity-50 z-0"></div>}
+                        </label>
+
+
+                    </div>
+
+                    {/* Bottom Row: Categories (Horizontal Scroll) */}
+                    <div className="relative mt-4 -mx-4 px-4 sm:mx-0 sm:px-0">
+                        <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-white to-transparent z-10 pointer-events-none sm:hidden" />
+                        <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none sm:hidden" />
+
+                        <div
+                            ref={categoryScrollRef}
+                            className="flex gap-3 overflow-x-auto pb-2 scrollbar-none snap-x"
+                            style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+                        >
+                            {CATEGORIES.map((cat, idx) => (
+                                <button
+                                    key={cat}
+                                    onClick={() => setSelectedCategory(cat)}
+                                    className={`
+                                        snap-start shrink-0 px-5 py-2 rounded-full font-bold text-sm transition-all
+                                        ${selectedCategory === cat
+                                            ? 'bg-primary text-white shadow-lg shadow-primary/25 scale-105'
+                                            : 'bg-white text-gray-500 border border-gray-100 hover:bg-gray-50 hover:border-gray-200'}
+                                    `}
+                                >
+                                    {cat}
+                                </button>
+                            ))}
+
+                            {/* Filter Button */}
+                            <button
+                                onClick={() => setShowFilters(!showFilters)}
+                                className={`
+                                        snap-start shrink-0 px-5 py-2 rounded-full font-bold text-sm transition-all flex items-center gap-2
+                                        ${showFilters || sortBy !== 'recommended' || priceRange !== 'all'
+                                        ? 'bg-primary text-white shadow-lg shadow-primary/25 scale-105'
+                                        : 'bg-white text-gray-500 border border-gray-100 hover:bg-gray-50 hover:border-gray-200'}
+                                    `}
+                            >
+                                <Filter className="w-4 h-4" />
+                                <span>Filters</span>
+                                {(sortBy !== 'recommended' || priceRange !== 'all') && (
+                                    <span className="bg-white text-primary text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                                        {(sortBy !== 'recommended' ? 1 : 0) + (priceRange !== 'all' ? 1 : 0)}
+                                    </span>
+                                )}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Filter Modal (Fixed Position) */}
+                    {showFilters && (
+                        <>
+                            <div className="fixed inset-0 z-[60] bg-black/20 backdrop-blur-sm" onClick={() => setShowFilters(false)}></div>
+                            <div className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-[90%] max-w-sm bg-white rounded-3xl shadow-2xl border border-gray-100 p-6 z-[70] animate-scale-up">
+                                <div className="flex items-center justify-between mb-6">
+                                    <h2 className="text-xl font-black text-gray-900">Filters</h2>
+                                    <button onClick={() => setShowFilters(false)} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                                        <X className="w-5 h-5 text-gray-500" />
+                                    </button>
+                                </div>
+
+                                <div className="space-y-6">
+                                    {/* Sort Section */}
+                                    <div>
+                                        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Sort By</h3>
+                                        <div className="space-y-2">
+                                            {[
+                                                { label: 'Recommended', value: 'recommended' },
+                                                { label: 'Price: Low to High', value: 'priceLow' },
+                                                { label: 'Price: High to Low', value: 'priceHigh' },
+                                            ].map((option) => (
+                                                <label key={option.value} className="flex items-center justify-between cursor-pointer group p-2 hover:bg-gray-50 rounded-xl transition-colors">
+                                                    <span className={`text-sm font-medium transition-colors ${sortBy === option.value ? 'text-primary' : 'text-gray-600 group-hover:text-gray-900'}`}>{option.label}</span>
+                                                    <input
+                                                        type="radio"
+                                                        name="sort"
+                                                        className="accent-primary w-4 h-4"
+                                                        checked={sortBy === option.value}
+                                                        onChange={() => setSortBy(option.value)}
+                                                    />
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    <div className="h-px bg-gray-100"></div>
+
+                                    {/* Price Range Section */}
+                                    <div>
+                                        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Price Range</h3>
+                                        <div className="flex flex-wrap gap-2">
+                                            {[
+                                                { label: 'Any', value: 'all' },
+                                                { label: 'Under ₹100', value: 'under100' },
+                                                { label: '₹100 - ₹200', value: '100to200' },
+                                                { label: 'Above ₹200', value: 'above200' },
+                                            ].map((range) => (
+                                                <button
+                                                    key={range.value}
+                                                    onClick={() => setPriceRange(range.value)}
+                                                    className={`px-3 py-1.5 rounded-lg text-xs font-bold border transition-all ${priceRange === range.value
+                                                        ? 'bg-primary text-white border-primary'
+                                                        : 'bg-white text-gray-600 border-gray-200 hover:border-gray-300'
+                                                        }`}
+                                                >
+                                                    {range.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Actions */}
+                                    <div className="flex gap-3 pt-2">
+                                        {(sortBy !== 'recommended' || priceRange !== 'all') && (
+                                            <button
+                                                onClick={() => { setSortBy('recommended'); setPriceRange('all'); }}
+                                                className="flex-1 py-3 text-sm text-red-500 font-bold bg-red-50 hover:bg-red-100 rounded-xl transition-colors"
+                                            >
+                                                Clear
+                                            </button>
+                                        )}
+                                        <button
+                                            onClick={() => setShowFilters(false)}
+                                            className="flex-1 py-3 text-sm text-white font-bold bg-primary hover:bg-primary-hover rounded-xl shadow-lg shadow-primary/25 transition-all active:scale-95"
+                                        >
+                                            Apply Filters
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </>
+                    )}
+                </div>
             </div>
 
-            {loading && (
-                <div className="flex flex-col items-center justify-center py-20 min-h-[400px]">
-                    <div className="relative">
-                        <div className="w-16 h-16 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-                        <div className="absolute inset-0 flex items-center justify-center">
-                            <span className="text-xs font-bold text-primary">QB</span>
+            {/* Content */}
+            <div className="max-w-7xl mx-auto px-4 py-8">
+                {loading ? (
+                    <div className="text-center py-20">
+                        <Loader className="w-10 h-10 text-primary animate-spin mx-auto mb-4" />
+                        <p className="text-gray-500 font-medium">Loading delicious items...</p>
+                    </div>
+                ) : error ? (
+                    <div className="text-center py-20 bg-red-50 rounded-3xl">
+                        <p className="text-red-500 font-bold">{error}</p>
+                    </div>
+                ) : filteredItems.length === 0 ? (
+                    <div className="text-center py-32 bg-white rounded-3xl border border-gray-100 border-dashed">
+                        <Search className="w-16 h-16 text-gray-200 mx-auto mb-4" />
+                        <h3 className="text-xl font-bold text-gray-900">No items found</h3>
+                        <p className="text-gray-500 mt-2">Try adjusting your filters</p>
+                        <button
+                            onClick={() => { setSelectedCategory('All'); setSearchQuery(''); setOnlyVeg(false); setSortBy('recommended'); setPriceRange('all'); }}
+                            className="mt-6 text-primary font-bold hover:underline"
+                        >
+                            Clear all filters
+                        </button>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
+                        {currentItems.map((item, index) => (
+                            <FoodCard key={item._id} item={item} onAdd={useCart().addToCart} index={index} />
+                        ))}
+                    </div>
+                )}
+
+                {/* Pagination Controls */}
+                {!loading && !error && filteredItems.length > 0 && totalPages > 1 && (
+                    <div className="flex justify-center mt-12">
+                        <div className="flex bg-white rounded-2xl shadow-sm border border-gray-100 p-2 gap-1 sm:gap-2">
+                            <button
+                                onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                                disabled={currentPage === 1}
+                                className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-gray-600"
+                            >
+                                <ChevronLeft className="w-5 h-5" />
+                            </button>
+
+                            {renderPaginationButtons()}
+
+                            <button
+                                onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+                                disabled={currentPage === totalPages}
+                                className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-gray-600"
+                            >
+                                <ChevronRight className="w-5 h-5" />
+                            </button>
                         </div>
                     </div>
+                )}
+            </div>
+            {/* Floating Cart Bar */}
+            {totalItems > 0 && (
+                <div className="fixed bottom-6 left-4 right-4 z-50 animate-slide-up">
+                    <Link to="/cart" className="bg-primary text-white p-3 rounded-2xl shadow-xl shadow-primary/20 flex items-center justify-between hover:bg-primary-hover transition-all group border border-white/20 backdrop-blur-xl max-w-xl mx-auto">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-white/20 p-2 rounded-xl backdrop-blur-sm">
+                                <ShoppingCart className="w-5 h-5 text-white group-hover:scale-110 transition-transform" />
+                            </div>
+                            <div className="flex flex-col">
+                                <span className="font-bold text-[10px] text-white/80 uppercase tracking-wider leading-none mb-0.5">{totalItems} ITEMS</span>
+                                <span className="font-black text-lg text-white leading-none">₹{totalAmount}</span>
+                            </div>
+                        </div>
+
+                        <div className="flex items-center gap-1.5 font-bold bg-white text-primary px-4 py-2 rounded-xl shadow-sm group-hover:bg-white/90 transition-colors text-sm">
+                            View Cart
+                            <ChevronRight className="w-4 h-4" />
+                        </div>
+                    </Link>
                 </div>
-            )}
-
-            {error && (
-                <div className="max-w-md mx-auto bg-red-50 border border-red-100 text-red-600 p-6 rounded-2xl text-center mb-8 shadow-sm">
-                    <p className="font-semibold">{error}</p>
-                </div>
-            )}
-
-            {!loading && !error && (
-                <>
-                    {/* Search and Filter Controls */}
-                    <div className="sticky top-24 z-30 glass-card p-4 rounded-2xl mb-12 animate-slide-up shadow-lg">
-                        <div className="flex flex-col md:flex-row gap-4 justify-between items-center">
-
-                            {/* Search */}
-                            <div className="relative flex-grow w-full md:w-auto md:max-w-md group">
-                                <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5 group-focus-within:text-primary transition-colors" />
-                                <input
-                                    type="text"
-                                    placeholder="What are you craving?"
-                                    className="w-full pl-12 pr-4 py-3.5 rounded-xl bg-gray-50 border-transparent focus:bg-white focus:border-primary/20 focus:ring-4 focus:ring-primary/10 transition-all font-medium text-gray-700 placeholder-gray-400"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
-                            </div>
-
-                            {/* Categories - Desktop / Scrollable Mobile */}
-                            <div className="flex-grow w-full overflow-x-auto pb-2 md:pb-0 scrollbar-hide">
-                                <div className="flex gap-2 md:justify-center">
-                                    {CATEGORIES.map(cat => (
-                                        <button
-                                            key={cat}
-                                            onClick={() => setSelectedCategory(cat)}
-                                            className={`px-5 py-2.5 rounded-full whitespace-nowrap font-semibold text-sm transition-all duration-300
-                                                ${selectedCategory === cat
-                                                    ? 'bg-gray-900 text-white shadow-lg scale-105'
-                                                    : 'bg-transparent text-gray-500 hover:bg-gray-100 hover:text-gray-900'}
-                                            `}
-                                        >
-                                            {cat}
-                                        </button>
-                                    ))}
-                                </div>
-                            </div>
-
-                            {/* Sort */}
-                            <div className="relative min-w-[160px] w-full md:w-auto">
-                                <ArrowUpDown className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 pointer-events-none" />
-                                <select
-                                    className="w-full pl-10 pr-8 py-3.5 rounded-xl bg-gray-50 border-transparent focus:bg-white focus:border-primary/20 focus:ring-4 focus:ring-primary/10 appearance-none font-medium text-gray-700 cursor-pointer hover:bg-gray-100 transition-colors"
-                                    value={sortBy}
-                                    onChange={(e) => setSortBy(e.target.value)}
-                                >
-                                    <option value="">Sort by</option>
-                                    <option value="price-asc">Price: Low to High</option>
-                                    <option value="price-desc">Price: High to Low</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Menu Grid */}
-                    {filteredItems.length === 0 ? (
-                        <div className="text-center py-20">
-                            <p className="text-2xl font-bold text-gray-300">No items found</p>
-                            <p className="text-gray-400 mt-2">Try changing your search or category</p>
-                        </div>
-                    ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
-                            {filteredItems.map((item, index) => (
-                                <div key={item.id} className="animate-fade-in" style={{ animationDelay: `${index * 50}ms` }}>
-                                    <FoodCard item={item} onAdd={addToCart} />
-                                </div>
-                            ))}
-                        </div>
-                    )}
-
-                    {/* Floating Cart Button */}
-                    {totalItems > 0 && (
-                        <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 z-40 animate-bounce-subtle">
-                            <Link to="/cart" className="flex items-center gap-4 bg-gray-900 text-white pl-6 pr-8 py-4 rounded-full shadow-2xl hover:bg-black transition-all hover:scale-105 group border border-gray-700/50 backdrop-blur-md">
-                                <div className="relative">
-                                    <ShoppingCart className="w-6 h-6 group-hover:text-primary transition-colors" />
-                                    <span className="absolute -top-2 -right-2 bg-primary text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center border-2 border-gray-900">
-                                        {totalItems}
-                                    </span>
-                                </div>
-                                <div className="flex flex-col items-start leading-none">
-                                    <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Total</span>
-                                    <span className="font-bold text-lg">View Cart</span>
-                                </div>
-                            </Link>
-                        </div>
-                    )}
-                </>
             )}
         </div>
     );
