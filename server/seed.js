@@ -12,7 +12,7 @@ const sampleItems = [
         category: 'Lunch',
         available: true,
         description: 'Flavorful basmati rice cooked with mixed vegetables and aromatic spices.',
-        image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&q=80&w=500',
+        image: '/images/VegDumBiryani.jpg',
         isVeg: true
     },
     {
@@ -21,7 +21,7 @@ const sampleItems = [
         category: 'Lunch',
         available: true,
         description: 'Classic wok-tossed rice with crunchy vegetables and soy sauce.',
-        image: 'https://images.unsplash.com/photo-1603133872878-684f10842740?auto=format&fit=crop&q=80&w=500',
+        image: '/images/VegFriedRice.png',
         isVeg: true
     },
     {
@@ -30,7 +30,7 @@ const sampleItems = [
         category: 'Lunch',
         available: true,
         description: 'Stir-fried noodles with julienned veggies and mild chinese spices.',
-        image: 'https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?auto=format&fit=crop&q=80&w=500',
+        image: '/images/VegHakkaNoodles.jpg',
         isVeg: true
     },
     {
@@ -39,7 +39,7 @@ const sampleItems = [
         category: 'Lunch',
         available: true,
         description: 'Spicy fried rice tossed in fiery Schezwan sauce.',
-        image: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&q=80&w=500',
+        image: '/images/VegSchezwanRice.jpg',
         isVeg: true
     },
     {
@@ -48,7 +48,7 @@ const sampleItems = [
         category: 'Lunch',
         available: true,
         description: 'Spicy noodles tossed with Schezwan sauce and veggies.',
-        image: 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&q=80&w=500',
+        image: '/images/VegSchezwanNoodles.jpg',
         isVeg: true
     },
     {
@@ -57,7 +57,7 @@ const sampleItems = [
         category: 'Lunch',
         available: true,
         description: 'Fried rice served with delicious veg manchurian balls.',
-        image: 'https://images.unsplash.com/photo-1525755662778-989d0524087e?auto=format&fit=crop&q=80&w=500',
+        image: '/images/VegManchurian Rice.png',
         isVeg: true
     },
     {
@@ -66,7 +66,7 @@ const sampleItems = [
         category: 'Lunch',
         available: true,
         description: 'Combination of rice, noodles, and rich gravy.',
-        image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&q=80&w=500', // Placeholder
+        image: '/images/VegTripleRice.png',
         isVeg: true
     },
     {
@@ -75,7 +75,7 @@ const sampleItems = [
         category: 'Lunch',
         available: true,
         description: 'A perfect blend of rice and noodles stir-fried together.',
-        image: 'https://images.unsplash.com/photo-1525755662778-989d0524087e?auto=format&fit=crop&q=80&w=500', // Placeholder
+        image: '/images/VegCombinationRice.jpg',
         isVeg: true
     },
     {
@@ -84,7 +84,7 @@ const sampleItems = [
         category: 'Lunch',
         available: true,
         description: 'Comforting mix of rice and lentils tempered with ghee and spices.',
-        image: 'https://images.unsplash.com/photo-1548943487-a2e4e43b485c?auto=format&fit=crop&q=80&w=500',
+        image: '/images/DalKhichdi.jpg',
         isVeg: true
     },
     {
@@ -93,7 +93,7 @@ const sampleItems = [
         category: 'Lunch',
         available: true,
         description: 'Rice tossed with a special blend of aromatic masalas.',
-        image: 'https://images.unsplash.com/photo-1596797038530-2c107229654b?auto=format&fit=crop&q=80&w=500',
+        image: '/images/MasalaRice.png',
         isVeg: true
     },
     {
@@ -102,7 +102,7 @@ const sampleItems = [
         category: 'Lunch',
         available: true,
         description: 'Simple and home-style yellow dal with steamed rice.',
-        image: 'https://images.unsplash.com/photo-1548943487-a2e4e43b485c?auto=format&fit=crop&q=80&w=500',
+        image: '/images/DalRice.jpg',
         isVeg: true
     },
 
@@ -122,7 +122,7 @@ const sampleItems = [
         category: 'Lunch',
         available: true,
         description: 'Wok-tossed rice with egg, chicken, and veggies.',
-        image: 'https://images.unsplash.com/photo-1603133872878-684f10842740?auto=format&fit=crop&q=80&w=500',
+        image: '/images/ChickenFriedRice.jpg',
         isVeg: false
     },
     {
@@ -131,7 +131,7 @@ const sampleItems = [
         category: 'Lunch',
         available: true,
         description: 'Stir-fried noodles with chicken strips and veggies.',
-        image: 'https://images.unsplash.com/photo-1612929633738-8fe44f7ec841?auto=format&fit=crop&q=80&w=500',
+        image: '/images/ChickenNoodles.jpg',
         isVeg: false
     },
     {
@@ -140,7 +140,7 @@ const sampleItems = [
         category: 'Lunch',
         available: true,
         description: 'Spicy chicken fried rice with Schezwan sauce.',
-        image: 'https://images.unsplash.com/photo-1534422298391-e4f8c172dddb?auto=format&fit=crop&q=80&w=500',
+        image: '/images/ChickenFriedRice.jpg',
         isVeg: false
     },
     {
@@ -149,7 +149,7 @@ const sampleItems = [
         category: 'Lunch',
         available: true,
         description: 'Spicy chicken noodles tossed in Schezwan sauce.',
-        image: 'https://images.unsplash.com/photo-1585032226651-759b368d7246?auto=format&fit=crop&q=80&w=500',
+        image: '/images/ChickenSchezwan Noodles.jpg',
         isVeg: false
     },
     {
@@ -158,7 +158,7 @@ const sampleItems = [
         category: 'Lunch',
         available: true,
         description: 'A heavy meal with chicken rice, noodles, and gravy.',
-        image: 'https://images.unsplash.com/photo-1603133872878-684f10842740?auto=format&fit=crop&q=80&w=500',
+        image: '/images/ChickenTripleRice.jpeg',
         isVeg: false
     },
     {
@@ -167,7 +167,7 @@ const sampleItems = [
         category: 'Lunch',
         available: true,
         description: 'Mixed chicken rice and noodles wok-tossed together.',
-        image: 'https://images.unsplash.com/photo-1603133872878-684f10842740?auto=format&fit=crop&q=80&w=500',
+        image: '/images/CombinationRice.jpg',
         isVeg: false
     },
 
@@ -178,7 +178,7 @@ const sampleItems = [
         category: 'Snacks',
         available: true,
         description: 'Deep-fried veggie balls tossed in tangy chinese sauces.',
-        image: 'https://images.unsplash.com/photo-1525755662778-989d0524087e?auto=format&fit=crop&q=80&w=500',
+        image: '/images/ManchurianDry.webp',
         isVeg: true
     },
     {
@@ -187,7 +187,7 @@ const sampleItems = [
         category: 'Snacks',
         available: true,
         description: 'Crispy mushrooms tossed with onions and bell peppers.',
-        image: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&q=80&w=500', // Placeholder
+        image: '/images/MushroomChilli Dry.jpg',
         isVeg: true
     },
 
@@ -198,7 +198,7 @@ const sampleItems = [
         category: 'South Indian',
         available: true,
         description: 'Soft steamed rice cakes served with spicy sambar and chutney.',
-        image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&q=80&w=500',
+        image: '/images/IdliSambar.webp',
         isVeg: true
     },
     {
@@ -207,7 +207,7 @@ const sampleItems = [
         category: 'South Indian',
         available: true,
         description: 'Crispy deep-fried lentil donuts served with sambar.',
-        image: 'https://images.unsplash.com/photo-1630383249896-424e482df921?auto=format&fit=crop&q=80&w=500',
+        image: '/images/MeduVadaSambar.jpg',
         isVeg: true
     },
     {
@@ -216,7 +216,7 @@ const sampleItems = [
         category: 'South Indian',
         available: true,
         description: 'Combo of Idli and Medu Vada with sambar.',
-        image: 'https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&q=80&w=500', // Placeholder
+        image: '/images/IdliVadaSambar.jpg',
         isVeg: true
     },
     {
@@ -225,7 +225,7 @@ const sampleItems = [
         category: 'Snacks', // Or South Indian
         available: true,
         description: 'Savory semolina porridge with vegetables and nuts.',
-        image: 'https://images.unsplash.com/photo-1550950158-d0d960d9f9dd?auto=format&fit=crop&q=80&w=500', // Placeholder
+        image: '/images/Upma.jpg',
         isVeg: true
     },
     {
@@ -245,7 +245,7 @@ const sampleItems = [
         category: 'Snacks',
         available: true,
         description: 'Spicy sprouted curry topped with farsan, served with pav.',
-        image: 'https://www.indianhealthyrecipe.com/wp-content/uploads/2024/02/Misal-Pav-Instant-Pot-1.webp',
+        image: '/images/MisalPav.jpg',
         isVeg: true
     },
     {
@@ -254,7 +254,7 @@ const sampleItems = [
         category: 'Snacks',
         available: true,
         description: 'Traditional chickpea or sprouts curry served with pav.',
-        image: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&q=80&w=500', // Placeholder
+        image: '/images/UsalPav.jpg',
         isVeg: true
     },
     {
@@ -263,7 +263,7 @@ const sampleItems = [
         category: 'Snacks',
         available: true,
         description: 'Spicy usal topped with a potato vada and served with pav.',
-        image: 'https://images.unsplash.com/photo-1606491956689-2ea28c674675?auto=format&fit=crop&q=80&w=500', // Placeholder
+        image: '/images/VadaUsalPav.jpg',
         isVeg: true
     },
     {
@@ -272,7 +272,7 @@ const sampleItems = [
         category: 'Snacks',
         available: true,
         description: 'Spiced mashed potato balls deep fried in gram flour batter.',
-        image: 'https://images.unsplash.com/photo-1606491956689-2ea28c674675?auto=format&fit=crop&q=80&w=500',
+        image: '/images/PotatoVada.jpg',
         isVeg: true
     },
     {
@@ -281,7 +281,7 @@ const sampleItems = [
         category: 'Snacks',
         available: true,
         description: 'Crispy pastry filled with spiced potatoes and peas.',
-        image: 'https://images.unsplash.com/photo-1601050690597-df0568f70950?auto=format&fit=crop&q=80&w=500',
+        image: '/images/PunjabiSamosa.webp',
         isVeg: true
     },
     {
@@ -290,7 +290,7 @@ const sampleItems = [
         category: 'Snacks',
         available: true,
         description: 'Crispy fried patties made of mixed vegetables.',
-        image: 'https://images.unsplash.com/photo-1541518763669-27fef04b14ea?auto=format&fit=crop&q=80&w=500', // Placeholder
+        image: '/images/VegCutlet.jpg',
         isVeg: true
     },
     {
@@ -299,7 +299,7 @@ const sampleItems = [
         category: 'Snacks',
         available: true,
         description: 'Bread slices stuffed with spiced potato, dipped in batter and fried.',
-        image: 'https://images.unsplash.com/photo-1606491956689-2ea28c674675?auto=format&fit=crop&q=80&w=500', // Placeholder
+        image: '/images/BreadPakoda.jpg',
         isVeg: true
     },
     {
@@ -308,7 +308,7 @@ const sampleItems = [
         category: 'Snacks',
         available: true,
         description: 'Steamed savory cake made from gram flour, seasoned with mustard seeds.',
-        image: 'https://images.unsplash.com/photo-1528735602780-2552fd46c7af?auto=format&fit=crop&q=80&w=500', // Placeholder
+        image: '/images/Dhokla.jpg',
         isVeg: true
     },
     {
@@ -317,7 +317,7 @@ const sampleItems = [
         category: 'Snacks',
         available: true,
         description: 'Crispy fritters made from tapioca pearls and peanuts.',
-        image: 'https://images.unsplash.com/photo-1606491956689-2ea28c674675?auto=format&fit=crop&q=80&w=500', // Placeholder
+        image: '/images/SabudanaVada.jpg',
         isVeg: true
     },
     {
@@ -326,7 +326,7 @@ const sampleItems = [
         category: 'Snacks',
         available: true,
         description: 'Tapioca pearls cooked with peanuts, curry leaves, and chillies.',
-        image: 'https://images.unsplash.com/photo-1596797038530-2c107229654b?auto=format&fit=crop&q=80&w=500', // Placeholder
+        image: '/images/SabudanaKhichdi.jpg',
         isVeg: true
     },
 
@@ -337,7 +337,7 @@ const sampleItems = [
         category: 'Snacks',
         available: true,
         description: 'Fluffy 2-egg omelette served with fresh pav.',
-        image: 'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?auto=format&fit=crop&q=80&w=500',
+        image: '/images/OmelettePav.jpg',
         isVeg: false
     },
     {
@@ -346,7 +346,7 @@ const sampleItems = [
         category: 'Snacks',
         available: true,
         description: 'Spicy scrambled eggs with onion and tomato, served with pav.',
-        image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&q=80&w=500', // Placeholder
+        image: '/images/BhurjiPav.jpg',
         isVeg: false
     },
     {
@@ -355,7 +355,7 @@ const sampleItems = [
         category: 'Snacks',
         available: true,
         description: 'Spicy stir-fried chicken chunks with green chillies.',
-        image: 'https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&q=80&w=500', // Placeholder
+        image: '/images/ChickenChilliDry.jpg',
         isVeg: false
     },
     {
@@ -364,7 +364,7 @@ const sampleItems = [
         category: 'Snacks',
         available: true,
         description: 'Spicy, deep-fried chicken dish originating from Chennai.',
-        image: 'https://images.unsplash.com/photo-1626082927389-6cd097cdc6ec?auto=format&fit=crop&q=80&w=500', // Placeholder
+        image: '/images/Chicken65.jpg',
         isVeg: false
     }
 ];

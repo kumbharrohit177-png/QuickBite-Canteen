@@ -69,6 +69,11 @@ export default function MenuPage() {
         setCurrentPage(1);
     }, [selectedCategory, searchQuery, onlyVeg, sortBy, priceRange]);
 
+    // Scroll to top when page changes
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [currentPage]);
+
     const renderPaginationButtons = () => {
         const pages = [];
         if (totalPages <= 7) {
