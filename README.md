@@ -72,6 +72,11 @@ Follow these instructions to get a copy of the project up and running on your lo
     ```bash
     npm run dev
     ```
+    
+    Seed the database with initial menu items (Optional but recommended):
+    ```bash
+    node seed.js
+    ```
 
 3.  **Setup Frontend**
     Open a new terminal and navigate to the client directory:
