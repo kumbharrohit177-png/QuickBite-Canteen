@@ -142,4 +142,4 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ---
 
-Developed with ❤️ by [Rohit Kumbhar]
+Developed with ❤️ by [Rohit Kumbhar,Adinath kharatmol,Subhanshu guntuka,Tanmay kadam]
