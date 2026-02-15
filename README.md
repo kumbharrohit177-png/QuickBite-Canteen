@@ -14,6 +14,9 @@ QuickBite is a modern, efficient, and user-friendly web application designed to 
 - **System Notifications**: Real-time toast notifications for all major actions (Login, Order, Payment).
 - **Admin Dashboard**: Comprehensive dashboard for canteen staff to manage orders, update menu items, and track sales.
 - **Responsive Design**: Fully optimized for meaningful experiences on desktops, tablets, and mobile devices.
+- **Modern UI/UX**: Implemented with Glassmorphism, 3D tilt effects, and smooth scroll animations for a premium feel.
+- **Mobile App Preview**: Dedicated section showcasing the upcoming mobile application.
+- **Social Proof**: "Popular & Trending" section highlighting "Most Ordered", "Top Rated", and "Recently Added" items.
 
 ## 🛠️ Tech Stack
 

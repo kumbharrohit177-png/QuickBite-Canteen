@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import FoodCard from '../components/FoodCard';
 import { useCart } from '../context/CartContext';
-import { ShoppingCart, Search, Filter, X, ChevronRight, ChevronLeft, Sparkles, Loader } from 'lucide-react';
+import { ShoppingCart, Search, Filter, X, ChevronRight, ChevronLeft, Sparkles, Loader, Leaf, Drumstick } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import api from '../api/axios';
 
@@ -11,6 +11,7 @@ export default function MenuPage() {
     const [selectedCategory, setSelectedCategory] = useState('All');
     const [searchQuery, setSearchQuery] = useState('');
     const [onlyVeg, setOnlyVeg] = useState(false);
+    const [onlyNonVeg, setOnlyNonVeg] = useState(false);
     const [showFilters, setShowFilters] = useState(false);
     const [sortBy, setSortBy] = useState('recommended');
     const [priceRange, setPriceRange] = useState('all');
@@ -42,6 +43,7 @@ export default function MenuPage() {
         const matchesCategory = selectedCategory === 'All' || item.category === selectedCategory;
         const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesVeg = !onlyVeg || item.isVeg;
+        const matchesNonVeg = !onlyNonVeg || !item.isVeg;
         const matchesAvailability = item.available !== false;
 
         // Price Filter
@@ -50,7 +52,7 @@ export default function MenuPage() {
         else if (priceRange === '100to200') matchesPrice = item.price >= 100 && item.price <= 200;
         else if (priceRange === 'above200') matchesPrice = item.price > 200;
 
-        return matchesCategory && matchesSearch && matchesVeg && matchesAvailability && matchesPrice;
+        return matchesCategory && matchesSearch && matchesVeg && matchesNonVeg && matchesAvailability && matchesPrice;
     }).sort((a, b) => {
         if (sortBy === 'priceLow') return a.price - b.price;
         if (sortBy === 'priceHigh') return b.price - a.price;
@@ -67,7 +69,7 @@ export default function MenuPage() {
     // Reset to first page when filters change
     useEffect(() => {
         setCurrentPage(1);
-    }, [selectedCategory, searchQuery, onlyVeg, sortBy, priceRange]);
+    }, [selectedCategory, searchQuery, onlyVeg, onlyNonVeg, sortBy, priceRange]);
 
     // Scroll to top when page changes
     useEffect(() => {
@@ -157,20 +159,37 @@ export default function MenuPage() {
                             )}
                         </div>
 
-                        <label className="flex items-center gap-3 cursor-pointer group bg-white border border-gray-100 px-4 py-2.5 rounded-2xl shadow-sm hover:bg-gray-50 transition-all select-none relative overflow-hidden">
-                            <span className={`font-bold text-sm transition-colors z-10 ${onlyVeg ? 'text-green-600' : 'text-gray-500'}`}>Veg Only</span>
-                            <div className="relative z-10">
-                                <input
-                                    type="checkbox"
-                                    className="sr-only"
-                                    checked={onlyVeg}
-                                    onChange={() => setOnlyVeg(!onlyVeg)}
-                                />
-                                <div className={`w-11 h-6 rounded-full shadow-inner transition-colors duration-300 ${onlyVeg ? 'bg-green-500' : 'bg-gray-200'}`}></div>
-                                <div className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full shadow-md transition-transform duration-300 ${onlyVeg ? 'translate-x-5' : 'translate-x-0'}`}></div>
+                        <button
+                            onClick={() => {
+                                setOnlyVeg(!onlyVeg);
+                                if (!onlyVeg) setOnlyNonVeg(false);
+                            }}
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border transition-all duration-300 group ${onlyVeg
+                                ? 'bg-green-50 border-green-500 text-green-700 shadow-md shadow-green-100'
+                                : 'bg-white border-gray-200 text-gray-500 hover:border-green-200 hover:text-green-600 hover:shadow-sm'
+                                }`}
+                        >
+                            <div className={`p-1.5 rounded-full transition-colors ${onlyVeg ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-400 group-hover:bg-green-100 group-hover:text-green-500'}`}>
+                                <Leaf className="w-4 h-4 fill-current" />
                             </div>
-                            {onlyVeg && <div className="absolute inset-0 bg-green-50 opacity-50 z-0"></div>}
-                        </label>
+                            <span className="font-bold text-sm">Veg Only</span>
+                        </button>
+
+                        <button
+                            onClick={() => {
+                                setOnlyNonVeg(!onlyNonVeg);
+                                if (!onlyNonVeg) setOnlyVeg(false);
+                            }}
+                            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border transition-all duration-300 group ${onlyNonVeg
+                                ? 'bg-red-50 border-red-500 text-red-700 shadow-md shadow-red-100'
+                                : 'bg-white border-gray-200 text-gray-500 hover:border-red-200 hover:text-red-600 hover:shadow-sm'
+                                }`}
+                        >
+                            <div className={`p-1.5 rounded-full transition-colors ${onlyNonVeg ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-400 group-hover:bg-red-100 group-hover:text-red-500'}`}>
+                                <Drumstick className="w-4 h-4 fill-current" />
+                            </div>
+                            <span className="font-bold text-sm">Non-Veg Only</span>
+                        </button>
 
 
                     </div>
@@ -324,7 +343,7 @@ export default function MenuPage() {
                         <h3 className="text-xl font-bold text-gray-900">No items found</h3>
                         <p className="text-gray-500 mt-2">Try adjusting your filters</p>
                         <button
-                            onClick={() => { setSelectedCategory('All'); setSearchQuery(''); setOnlyVeg(false); setSortBy('recommended'); setPriceRange('all'); }}
+                            onClick={() => { setSelectedCategory('All'); setSearchQuery(''); setOnlyVeg(false); setOnlyNonVeg(false); setSortBy('recommended'); setPriceRange('all'); }}
                             className="mt-6 text-primary font-bold hover:underline"
                         >
                             Clear all filters
