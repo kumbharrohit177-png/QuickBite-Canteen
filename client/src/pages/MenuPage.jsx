@@ -20,14 +20,14 @@ export default function MenuPage() {
     const [menuItems, setMenuItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const { totalItems, totalAmount } = useCart();
+    const { totalItems, totalAmount, addToCart } = useCart();
 
     const categoryScrollRef = useRef(null);
 
     useEffect(() => {
         const fetchMenu = async () => {
             try {
-                const res = await api.get('/menu');
+                const res = await api.get('/menu/all');
                 setMenuItems(res.data);
                 setLoading(false);
             } catch (err) {
@@ -44,7 +44,6 @@ export default function MenuPage() {
         const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesVeg = !onlyVeg || item.isVeg;
         const matchesNonVeg = !onlyNonVeg || !item.isVeg;
-        const matchesAvailability = item.available !== false;
 
         // Price Filter
         let matchesPrice = true;
@@ -52,7 +51,7 @@ export default function MenuPage() {
         else if (priceRange === '100to200') matchesPrice = item.price >= 100 && item.price <= 200;
         else if (priceRange === 'above200') matchesPrice = item.price > 200;
 
-        return matchesCategory && matchesSearch && matchesVeg && matchesNonVeg && matchesAvailability && matchesPrice;
+        return matchesCategory && matchesSearch && matchesVeg && matchesNonVeg && matchesPrice;
     }).sort((a, b) => {
         if (sortBy === 'priceLow') return a.price - b.price;
         if (sortBy === 'priceHigh') return b.price - a.price;
@@ -352,7 +351,7 @@ export default function MenuPage() {
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
                         {currentItems.map((item, index) => (
-                            <FoodCard key={item._id} item={item} onAdd={useCart().addToCart} index={index} />
+                            <FoodCard key={item._id} item={item} onAdd={addToCart} index={index} />
                         ))}
                     </div>
                 )}

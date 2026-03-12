@@ -62,6 +62,7 @@ export const AuthProvider = ({ children }) => {
             const res = await api.post('/auth/google', { token });
             console.log("Backend response:", res.data);
             localStorage.setItem('token', res.data.token);
+            localStorage.setItem('user', JSON.stringify(res.data.user));
             setUser(res.data.user);
             return { success: true };
         } catch (error) {

@@ -10,6 +10,7 @@ QuickBite is a modern, efficient, and user-friendly web application designed to 
 - **Pre-Ordering**: Schedule orders for specific time slots to skip the queue.
 - **Secure Payments**: Integrated Razorpay payment gateway for hassle-free transactions.
 - **Order Tracking**: Real-time updates on order status (Pending, Cooking, Ready, Completed).
+- **Post-Order Completion & Reviews**: Review/rating system, detailed order summary, receipt download, and favorites.
 - **Refunds & Policies**: Clear refund policies and automated cancellation handling.
 - **System Notifications**: Real-time toast notifications for all major actions (Login, Order, Payment).
 - **Admin Dashboard**: Comprehensive dashboard for canteen staff to manage orders, update menu items, and track sales.

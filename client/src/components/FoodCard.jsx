@@ -83,14 +83,10 @@ export default function FoodCard({ item, index }) {
 
                     <div className="flex flex-col items-end gap-1">
                         {/* Availability Status Text */}
-                        {item.available ? (
+                        {item.available && (
                             <span className="text-[10px] font-bold text-green-600 bg-green-50 px-2 py-0.5 rounded-full border border-green-100 flex items-center gap-1 mb-1">
                                 <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse"></div>
                                 Available
-                            </span>
-                        ) : (
-                            <span className="text-[10px] font-bold text-red-500 bg-red-50 px-2 py-0.5 rounded-full border border-red-100 mb-1">
-                                Unavailable
                             </span>
                         )}
 
@@ -111,7 +107,7 @@ export default function FoodCard({ item, index }) {
                                         <Plus className="w-4 h-4" />
                                     </>
                                 ) : (
-                                    <span>Sold Out</span>
+                                    <span>Out of Stock</span>
                                 )}
                             </button>
                         ) : (

@@ -42,6 +42,10 @@ const orderSchema = new mongoose.Schema({
         enum: ['Pending', 'Paid'],
         default: 'Pending' // For now, we assume simple flow
     },
+    instructions: {
+        type: String,
+        default: ''
+    },
     createdAt: {
         type: Date,
         default: Date.now

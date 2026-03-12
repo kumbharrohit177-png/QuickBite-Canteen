@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { Trash2, ArrowLeft, CheckCircle, Loader, AlertCircle, ShoppingBag, Plus, Minus, Ticket, FileText, Clock, ArrowRight, X } from 'lucide-react';
@@ -21,6 +21,21 @@ export default function CartPage() {
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
     const [instructions, setInstructions] = useState('');
     const [couponCode, setCouponCode] = useState('');
+    const [taxPercentage, setTaxPercentage] = useState(5);
+
+    useEffect(() => {
+        const fetchSettings = async () => {
+            try {
+                const res = await api.get('/admin/settings');
+                if (res.data.success && res.data.settings) {
+                    setTaxPercentage(res.data.settings.taxPercentage || 0);
+                }
+            } catch (err) {
+                console.error("Failed to load settings:", err);
+            }
+        };
+        fetchSettings();
+    }, []);
 
     const handleUpdateQuantity = (id, delta, currentQty) => {
         const newQty = currentQty + delta;
@@ -70,7 +85,7 @@ export default function CartPage() {
                         price: item.price,
                         quantity: item.quantity
                     })),
-                    totalAmount: totalAmount + Math.round(totalAmount * 0.05),
+                    totalAmount: totalAmount + Math.round(totalAmount * (taxPercentage / 100)),
                     pickupSlot: selectedSlot,
                     instructions: instructions
                 };
@@ -102,7 +117,7 @@ export default function CartPage() {
 
         try {
             // 1. Create Order
-            const amount = totalAmount + Math.round(totalAmount * 0.05);
+            const amount = totalAmount + Math.round(totalAmount * (taxPercentage / 100));
             const result = await api.post('/payment/create-order', { amount });
 
             if (!result) {
@@ -134,6 +149,7 @@ export default function CartPage() {
                             })),
                             totalAmount: amount,
                             pickupSlot: selectedSlot,
+                            instructions: instructions
                         };
 
                         const verifyRes = await api.post('/payment/verify', {
@@ -386,8 +402,8 @@ export default function CartPage() {
                                     <span className="font-medium text-gray-900">₹{totalAmount}</span>
                                 </div>
                                 <div className="flex justify-between text-gray-600">
-                                    <span>GST (5%)</span>
-                                    <span className="font-medium text-gray-900">₹{Math.round(totalAmount * 0.05)}</span>
+                                    <span>GST ({taxPercentage}%)</span>
+                                    <span className="font-medium text-gray-900">₹{Math.round(totalAmount * (taxPercentage / 100))}</span>
                                 </div>
                                 {couponCode && (
                                     <div className="flex justify-between text-green-600">
@@ -413,7 +429,7 @@ export default function CartPage() {
                             {/* Final Total */}
                             <div className="flex justify-between items-center mb-8 pt-4 border-t border-dashed border-gray-200">
                                 <span className="text-gray-600 font-bold uppercase tracking-wide">Total</span>
-                                <span className="text-3xl font-extrabold text-primary">₹{totalAmount + Math.round(totalAmount * 0.05)}</span>
+                                <span className="text-3xl font-extrabold text-primary">₹{totalAmount + Math.round(totalAmount * (taxPercentage / 100))}</span>
                             </div>
 
                             {/* Actions */}
@@ -462,7 +478,7 @@ export default function CartPage() {
                 isOpen={isPaymentModalOpen}
                 onClose={() => setIsPaymentModalOpen(false)}
                 onConfirm={handleConfirmPayment}
-                totalAmount={totalAmount + Math.round(totalAmount * 0.05)}
+                totalAmount={totalAmount + Math.round(totalAmount * (taxPercentage / 100))}
             />
         </div>
     );

@@ -1,6 +1,25 @@
 const express = require('express');
 const router = express.Router();
 const FoodItem = require('../models/FoodItem');
+const multer = require('multer');
+const path = require('path');
+const fs = require('fs');
+
+const uploadDir = path.join(__dirname, '../uploads');
+if (!fs.existsSync(uploadDir)) {
+    fs.mkdirSync(uploadDir);
+}
+
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, uploadDir);
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + '-' + Math.round(Math.random() * 1E9) + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({ storage: storage });
 
 // @route   GET /api/menu
 // @desc    Get all food items
@@ -28,9 +47,13 @@ router.get('/all', async (req, res) => {
 
 // @route   POST /api/menu
 // @desc    Add a new food item (Admin/Kitchen only - middleware to be added)
-router.post('/', async (req, res) => {
+router.post('/', upload.single('imageFile'), async (req, res) => {
     try {
-        const newItem = new FoodItem(req.body);
+        const itemData = req.body;
+        if (req.file) {
+            itemData.image = `http://localhost:5000/uploads/${req.file.filename}`;
+        }
+        const newItem = new FoodItem(itemData);
         const item = await newItem.save();
         res.json(item);
     } catch (err) {
@@ -41,12 +64,17 @@ router.post('/', async (req, res) => {
 
 // @route   PUT /api/menu/:id
 // @desc    Update a food item
-router.put('/:id', async (req, res) => {
+router.put('/:id', upload.single('imageFile'), async (req, res) => {
     try {
         let item = await FoodItem.findById(req.params.id);
         if (!item) return res.status(404).json({ msg: 'Item not found' });
 
-        item = await FoodItem.findByIdAndUpdate(req.params.id, { $set: req.body }, { new: true });
+        const itemData = req.body;
+        if (req.file) {
+            itemData.image = `http://localhost:5000/uploads/${req.file.filename}`;
+        }
+
+        item = await FoodItem.findByIdAndUpdate(req.params.id, { $set: itemData }, { new: true });
         res.json(item);
     } catch (err) {
         console.error(err.message);

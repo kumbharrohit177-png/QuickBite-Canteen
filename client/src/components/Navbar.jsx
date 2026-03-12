@@ -6,6 +6,7 @@ import { useEffect, useState } from 'react';
 import toast from 'react-hot-toast';
 
 import logo from '../assets/logo.png';
+import NotificationBell from './NotificationBell';
 
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
@@ -96,10 +97,20 @@ export default function Navbar() {
                                 </span>
                             )}
                         </Link>
+                        
+                        <NotificationBell />
 
                         {/* User Account */}
                         {user ? (
                             <div className="flex items-center gap-3">
+                                {user.role === 'admin' && (
+                                    <Link
+                                        to="/admin"
+                                        className="px-4 py-2 bg-purple-100 text-purple-700 font-bold rounded-lg hover:bg-purple-200 transition-colors"
+                                    >
+                                        Admin Panel
+                                    </Link>
+                                )}
                                 <div className="text-right">
                                     <p className="text-sm font-medium text-gray-800">{user.name || 'User'}</p>
                                     <p className="text-xs text-gray-500">Member</p>
@@ -125,6 +136,7 @@ export default function Navbar() {
 
                     {/* Mobile Menu Button */}
                     <div className="lg:hidden flex items-center gap-4">
+                        <NotificationBell />
                         <Link to="/cart" className="relative p-2">
                             <ShoppingCart className="w-6 h-6 text-gray-700" />
                             {totalItems > 0 && (
@@ -156,13 +168,24 @@ export default function Navbar() {
                         <MobileNavLink to="/orders" label="Orders" onClick={() => setIsOpen(false)} />
 
                         {user ? (
-                            <button
-                                onClick={handleLogout}
-                                className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 font-medium transition-colors"
-                            >
-                                <LogOut className="h-5 w-5" />
-                                Logout
-                            </button>
+                            <>
+                                {user.role === 'admin' && (
+                                    <Link
+                                        to="/admin"
+                                        className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg bg-purple-100 text-purple-700 font-bold transition-colors"
+                                        onClick={() => setIsOpen(false)}
+                                    >
+                                        Admin Panel
+                                    </Link>
+                                )}
+                                <button
+                                    onClick={handleLogout}
+                                    className="w-full flex items-center gap-3 px-3 py-2 rounded-lg text-red-600 hover:bg-red-50 font-medium transition-colors"
+                                >
+                                    <LogOut className="h-5 w-5" />
+                                    Logout
+                                </button>
+                            </>
                         ) : (
                             <Link
                                 to="/login"

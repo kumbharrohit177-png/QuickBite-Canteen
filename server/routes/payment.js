@@ -56,7 +56,7 @@ router.post('/verify', auth, async (req, res) => {
         }
 
         // Payment is legit, now create the order in DB
-        const { items, totalAmount, pickupSlot } = orderData;
+        const { items, totalAmount, pickupSlot, instructions } = orderData;
         const tokenNumber = Math.floor(1000 + Math.random() * 9000).toString();
 
         const newOrder = new Order({
@@ -65,11 +65,22 @@ router.post('/verify', auth, async (req, res) => {
             totalAmount,
             tokenNumber,
             pickupSlot,
+            instructions,
             paymentStatus: 'Paid',
             status: 'Pending'
         });
 
         const savedOrder = await newOrder.save();
+
+        // Emit new order event to admins/kitchen
+        const io = req.app.get('socketio');
+        if (io) {
+            const populatedOrder = await Order.findById(savedOrder._id)
+                .populate('user', 'name email phone')
+                .populate('items.foodItem', 'name price image');
+            io.emit('newOrderReceived', populatedOrder);
+        }
+
         res.json({ success: true, order: savedOrder });
 
     } catch (err) {

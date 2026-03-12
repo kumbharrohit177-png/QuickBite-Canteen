@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
+import { io } from 'socket.io-client';
+import PostOrderCompletion from '../components/PostOrderCompletion';
 
 export default function OrdersPage() {
     const [orders, setOrders] = useState([]);
@@ -35,6 +37,33 @@ export default function OrdersPage() {
         };
 
         fetchOrders();
+    }, []);
+
+    // Socket.io Real-time Updates
+    useEffect(() => {
+        const socket = io('http://localhost:5000');
+
+        socket.on('connect', () => {
+            console.log('Connected to real-time updates');
+        });
+
+        socket.on('orderStatusUpdated', (updatedOrder) => {
+            // Check if the order belongs to this user's list
+            setOrders(prevOrders => {
+                const orderExists = prevOrders.some(o => o._id === updatedOrder._id);
+                if (orderExists) {
+                    toast.success(`Order #${updatedOrder._id.slice(-6).toUpperCase()} is now ${updatedOrder.status}!`, {
+                        icon: '🔔',
+                    });
+                    return prevOrders.map(o => o._id === updatedOrder._id ? { ...o, status: updatedOrder.status } : o);
+                }
+                return prevOrders;
+            });
+        });
+
+        return () => {
+            socket.disconnect();
+        };
     }, []);
 
     // Filter Logic
@@ -268,68 +297,73 @@ function OrderCard({ order, index, onUpdate }) {
             {/* Expanded Details */}
             {expanded && (
                 <div className="bg-gray-50/50 border-t border-gray-100 p-6 animate-fade-in-down">
-                    {!isCancelled && (
+                    {!isCancelled && order.status !== 'Collected' && (
                         <div className="mb-8 bg-white p-6 rounded-2xl border border-gray-100 shadow-sm">
                             <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-6">Live Status</h4>
                             <LiveStatusTimeline currentStatus={order.status} createdAt={order.createdAt} />
                         </div>
                     )}
-                    <div className="grid md:grid-cols-2 gap-8">
-                        <div>
-                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Items Ordered</h4>
-                            <div className="space-y-3">
-                                {order.items.map((item, idx) => (
-                                    <div key={idx} className="flex justify-between items-center text-sm">
-                                        <div className="flex items-center gap-3">
-                                            <span className="font-bold text-gray-500">{item.quantity}x</span>
-                                            <span className="font-medium text-gray-800">{item.foodItem?.name || item.name || 'Unknown Item'}</span>
+
+                    {order.status === 'Collected' ? (
+                        <PostOrderCompletion order={order} />
+                    ) : (
+                        <div className="grid md:grid-cols-2 gap-8">
+                            <div>
+                                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Items Ordered</h4>
+                                <div className="space-y-3">
+                                    {order.items.map((item, idx) => (
+                                        <div key={idx} className="flex justify-between items-center text-sm">
+                                            <div className="flex items-center gap-3">
+                                                <span className="font-bold text-gray-500">{item.quantity}x</span>
+                                                <span className="font-medium text-gray-800">{item.foodItem?.name || item.name || 'Unknown Item'}</span>
+                                            </div>
+                                            <span className="font-bold text-gray-900">₹{item.price * item.quantity}</span>
                                         </div>
-                                        <span className="font-bold text-gray-900">₹{item.price * item.quantity}</span>
+                                    ))}
+                                </div>
+
+                                <div className="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
+                                    <span className="font-bold text-gray-900">Grand Total</span>
+                                    <span className="font-black text-xl text-primary">₹{order.totalAmount}</span>
+                                </div>
+                            </div>
+
+                            <div>
+                                <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Order Info</h4>
+                                <div className="space-y-4 text-sm">
+                                    <div className="flex items-center gap-3 text-gray-600">
+                                        <Clock className="w-4 h-4" />
+                                        <span className="font-medium">Pickup Slot: <span className="text-gray-900 font-bold">{order.pickupSlot}</span></span>
                                     </div>
-                                ))}
-                            </div>
+                                    <div className="flex items-center gap-3 text-gray-600">
+                                        <CheckCircle className="w-4 h-4" />
+                                        <span className="font-medium">Payment: <span className="text-green-600 font-bold">{order.paymentStatus === 'Paid' ? 'Paid Online' : 'Cash on Pickup'}</span></span>
+                                    </div>
 
-                            <div className="mt-4 pt-4 border-t border-gray-200 flex justify-between items-center">
-                                <span className="font-bold text-gray-900">Grand Total</span>
-                                <span className="font-black text-xl text-primary">₹{order.totalAmount}</span>
-                            </div>
-                        </div>
+                                    <div className="pt-4 flex gap-3">
+                                        {order.status === 'Pending' && (
+                                            <button
+                                                onClick={(e) => { e.stopPropagation(); handleCancel(); }}
+                                                disabled={actionLoading}
+                                                className="flex-1 bg-white border border-red-200 text-red-600 px-4 py-2.5 rounded-xl font-bold text-sm hover:bg-red-50 hover:border-red-300 transition-all flex items-center justify-center gap-2"
+                                            >
+                                                {actionLoading ? <Loader className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
+                                                Cancel Order
+                                            </button>
+                                        )}
 
-                        <div>
-                            <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-4">Order Info</h4>
-                            <div className="space-y-4 text-sm">
-                                <div className="flex items-center gap-3 text-gray-600">
-                                    <Clock className="w-4 h-4" />
-                                    <span className="font-medium">Pickup Slot: <span className="text-gray-900 font-bold">{order.pickupSlot}</span></span>
-                                </div>
-                                <div className="flex items-center gap-3 text-gray-600">
-                                    <CheckCircle className="w-4 h-4" />
-                                    <span className="font-medium">Payment: <span className="text-green-600 font-bold">Paid Online</span></span>
-                                </div>
-
-                                <div className="pt-4 flex gap-3">
-                                    {order.status === 'Pending' && (
                                         <button
-                                            onClick={(e) => { e.stopPropagation(); handleCancel(); }}
-                                            disabled={actionLoading}
-                                            className="flex-1 bg-white border border-red-200 text-red-600 px-4 py-2.5 rounded-xl font-bold text-sm hover:bg-red-50 hover:border-red-300 transition-all flex items-center justify-center gap-2"
+                                            onClick={(e) => { e.stopPropagation(); handleReorder(); }}
+                                            className="flex-1 bg-primary text-white px-4 py-2.5 rounded-xl font-bold text-sm hover:bg-primary-hover shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2"
                                         >
-                                            {actionLoading ? <Loader className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
-                                            Cancel Order
+                                            <RotateCcw className="w-4 h-4" />
+                                            Reorder
                                         </button>
-                                    )}
-
-                                    <button
-                                        onClick={(e) => { e.stopPropagation(); handleReorder(); }}
-                                        className="flex-1 bg-primary text-white px-4 py-2.5 rounded-xl font-bold text-sm hover:bg-primary-hover shadow-lg shadow-primary/20 transition-all flex items-center justify-center gap-2"
-                                    >
-                                        <RotateCcw className="w-4 h-4" />
-                                        Reorder
-                                    </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
+                    )}
                 </div>
             )}
         </div>
