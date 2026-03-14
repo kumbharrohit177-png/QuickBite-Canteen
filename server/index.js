@@ -10,10 +10,13 @@ const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 5000;
 
+// Allow frontend origin from env, or all origins in dev
+const corsOrigin = process.env.CORS_ORIGIN || '*';
+
 // Socket.io Setup
 const io = new Server(server, {
     cors: {
-        origin: "*", // Adjust to specific frontend origin in production
+        origin: corsOrigin,
         methods: ["GET", "POST", "PUT", "DELETE"]
     }
 });
@@ -29,7 +32,7 @@ io.on('connection', (socket) => {
 app.set('socketio', io);
 
 // Middleware
-app.use(cors());
+app.use(cors({ origin: corsOrigin }));
 app.use(express.json());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
