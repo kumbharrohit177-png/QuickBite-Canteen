@@ -14,6 +14,16 @@ export default function NotificationBell() {
         return saved ? JSON.parse(saved) : [];
     });
 
+    // Sync state between Mobile and Desktop Navbars
+    useEffect(() => {
+        const handleUpdate = () => {
+             const saved = localStorage.getItem('dismissedNotifications');
+             if (saved) setDismissed(JSON.parse(saved));
+        };
+        window.addEventListener('notifications_updated', handleUpdate);
+        return () => window.removeEventListener('notifications_updated', handleUpdate);
+    }, []);
+
     // Only fetch for logged in students/users (optional, but good practice)
     useEffect(() => {
         if (!user) return;
@@ -37,16 +47,24 @@ export default function NotificationBell() {
 
     const handleDismiss = (id, e) => {
         if (e) e.stopPropagation();
-        const newDismissed = [...dismissed, id];
-        setDismissed(newDismissed);
-        localStorage.setItem('dismissedNotifications', JSON.stringify(newDismissed));
+        const saved = localStorage.getItem('dismissedNotifications');
+        const currentDismissed = saved ? JSON.parse(saved) : [];
+        if (!currentDismissed.includes(id)) {
+            const newDismissed = [...currentDismissed, id];
+            setDismissed(newDismissed);
+            localStorage.setItem('dismissedNotifications', JSON.stringify(newDismissed));
+            window.dispatchEvent(new Event('notifications_updated'));
+        }
     };
 
     const handleClearAll = () => {
+        const saved = localStorage.getItem('dismissedNotifications');
+        const currentDismissed = saved ? JSON.parse(saved) : [];
         const allIds = notifications.map(n => n._id);
-        const newDismissed = [...new Set([...dismissed, ...allIds])];
+        const newDismissed = [...new Set([...currentDismissed, ...allIds])];
         setDismissed(newDismissed);
         localStorage.setItem('dismissedNotifications', JSON.stringify(newDismissed));
+        window.dispatchEvent(new Event('notifications_updated'));
     };
     
     if (!user) return null;

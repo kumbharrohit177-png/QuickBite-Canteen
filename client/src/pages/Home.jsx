@@ -148,22 +148,22 @@ export default function Home() {
                                 </p>
                             </div>
 
-                            <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start animate-slide-up" style={{ animationDelay: '0.3s' }}>
+                            <div className="flex flex-col sm:flex-row gap-3 justify-center lg:justify-start animate-slide-up" style={{ animationDelay: '0.3s' }}>
                                 <Link
                                     to="/menu"
-                                    className="flex items-center justify-center gap-2 px-8 py-4 bg-white text-primary rounded-2xl font-bold text-lg hover:bg-gray-50 hover:scale-105 transition-all shadow-xl shadow-black/10"
+                                    className="flex w-full sm:w-auto items-center justify-center gap-2 px-8 py-4 bg-white text-primary rounded-2xl font-bold text-lg hover:bg-gray-50 hover:scale-105 transition-all shadow-xl shadow-black/10"
                                 >
                                     Order Now <ArrowRight className="w-5 h-5" />
                                 </Link>
                                 <Link
                                     to="/login"
-                                    className="flex items-center justify-center gap-2 px-8 py-4 bg-transparent text-white border-2 border-white/30 rounded-2xl font-bold text-lg hover:bg-white/10 hover:border-white transition-all"
+                                    className="flex w-full sm:w-auto items-center justify-center gap-2 px-8 py-4 bg-transparent text-white border-2 border-white/30 rounded-2xl font-bold text-lg hover:bg-white/10 hover:border-white transition-all"
                                 >
                                     Sign In
                                 </Link>
                             </div>
 
-                            <div className="flex items-center justify-center lg:justify-start gap-8 pt-4 animate-slide-up" style={{ animationDelay: '0.5s' }}>
+                            <div className="flex items-center justify-center lg:justify-start gap-4 sm:gap-8 pt-4 animate-slide-up" style={{ animationDelay: '0.5s' }}>
                                 <div className="text-left">
                                     <p className="text-3xl font-bold text-white">15m</p>
                                     <p className="text-sm text-white/80 font-medium">Avg. Delivery</p>
@@ -308,7 +308,7 @@ export default function Home() {
                     </div>
 
                     {/* Grid */}
-                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
                         {menuItems.length > 0 ? (
                             menuItems
                                 .filter(item => {
@@ -402,9 +402,9 @@ export default function Home() {
             </div>
 
             {/* HOW IT WORKS */}
-            <div className="py-24 bg-white relative">
+            <div className="py-24 bg-white relative overflow-hidden">
                 <div className="max-w-7xl mx-auto px-4 md:px-8">
-                    <div className="grid lg:grid-cols-2 gap-16 items-center reveal-on-scroll">
+                    <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center reveal-on-scroll">
                         <div>
                             <span className="text-primary font-bold tracking-wider uppercase text-sm mb-2 block">How It Works</span>
                             <h2 className="text-4xl font-black text-gray-900 mb-6 leading-tight">
