@@ -158,37 +158,39 @@ export default function MenuPage() {
                             )}
                         </div>
 
-                        <button
-                            onClick={() => {
-                                setOnlyVeg(!onlyVeg);
-                                if (!onlyVeg) setOnlyNonVeg(false);
-                            }}
-                            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border transition-all duration-300 group ${onlyVeg
-                                ? 'bg-green-50 border-green-500 text-green-700 shadow-md shadow-green-100'
-                                : 'bg-white border-gray-200 text-gray-500 hover:border-green-200 hover:text-green-600 hover:shadow-sm'
-                                }`}
-                        >
-                            <div className={`p-1.5 rounded-full transition-colors ${onlyVeg ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-400 group-hover:bg-green-100 group-hover:text-green-500'}`}>
-                                <Leaf className="w-4 h-4 fill-current" />
-                            </div>
-                            <span className="font-bold text-sm">Veg Only</span>
-                        </button>
+                        <div className="flex gap-2 sm:contents">
+                            <button
+                                onClick={() => {
+                                    setOnlyVeg(!onlyVeg);
+                                    if (!onlyVeg) setOnlyNonVeg(false);
+                                }}
+                                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl border transition-all duration-300 group ${onlyVeg
+                                    ? 'bg-green-50 border-green-500 text-green-700 shadow-md shadow-green-100'
+                                    : 'bg-white border-gray-200 text-gray-500 hover:border-green-200 hover:text-green-600 hover:shadow-sm'
+                                    }`}
+                            >
+                                <div className={`hidden sm:flex p-1.5 rounded-full transition-colors ${onlyVeg ? 'bg-green-500 text-white' : 'bg-gray-100 text-gray-400 group-hover:bg-green-100 group-hover:text-green-500'}`}>
+                                    <Leaf className="w-4 h-4 fill-current" />
+                                </div>
+                                <span className="font-bold text-sm">Veg Only</span>
+                            </button>
 
-                        <button
-                            onClick={() => {
-                                setOnlyNonVeg(!onlyNonVeg);
-                                if (!onlyNonVeg) setOnlyVeg(false);
-                            }}
-                            className={`flex items-center gap-2 px-4 py-2.5 rounded-2xl border transition-all duration-300 group ${onlyNonVeg
-                                ? 'bg-red-50 border-red-500 text-red-700 shadow-md shadow-red-100'
-                                : 'bg-white border-gray-200 text-gray-500 hover:border-red-200 hover:text-red-600 hover:shadow-sm'
-                                }`}
-                        >
-                            <div className={`p-1.5 rounded-full transition-colors ${onlyNonVeg ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-400 group-hover:bg-red-100 group-hover:text-red-500'}`}>
-                                <Drumstick className="w-4 h-4 fill-current" />
-                            </div>
-                            <span className="font-bold text-sm">Non-Veg Only</span>
-                        </button>
+                            <button
+                                onClick={() => {
+                                    setOnlyNonVeg(!onlyNonVeg);
+                                    if (!onlyNonVeg) setOnlyVeg(false);
+                                }}
+                                className={`flex-1 sm:flex-none flex items-center justify-center gap-2 px-4 py-2.5 rounded-2xl border transition-all duration-300 group ${onlyNonVeg
+                                    ? 'bg-red-50 border-red-500 text-red-700 shadow-md shadow-red-100'
+                                    : 'bg-white border-gray-200 text-gray-500 hover:border-red-200 hover:text-red-600 hover:shadow-sm'
+                                    }`}
+                            >
+                                <div className={`hidden sm:flex p-1.5 rounded-full transition-colors ${onlyNonVeg ? 'bg-red-500 text-white' : 'bg-gray-100 text-gray-400 group-hover:bg-red-100 group-hover:text-red-500'}`}>
+                                    <Drumstick className="w-4 h-4 fill-current" />
+                                </div>
+                                <span className="font-bold text-sm">Non-Veg</span>
+                            </button>
+                        </div>
 
 
                     </div>
