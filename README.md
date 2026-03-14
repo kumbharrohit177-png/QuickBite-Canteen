@@ -38,31 +38,95 @@ This project is built using the **MERN Stack** with modern tooling:
 - **Database**: [MongoDB](https://www.mongodb.com/) (Compass/Atlas) with Mongoose ODM
 - **Authentication**: JSON Web Tokens (JWT) & Google Auth Library
 - **Payments**: Razorpay Node.js SDK
+- **Real-Time**: Socket.IO
+
+### DevOps
+- **Containerization**: [Docker](https://www.docker.com/) & Docker Compose
+- **Web Server**: [Nginx](https://nginx.org/) (serves frontend + proxies API)
+
+---
 
 ## 🚀 Getting Started
 
-Follow these instructions to get a copy of the project up and running on your local machine.
+### Option 1 — Docker (Recommended) 🐳
 
-### Prerequisites
+The easiest way to run the entire stack with a single command.
 
-- [Node.js](https://nodejs.org/) (v14 or higher)
-- [MongoDB](https://www.mongodb.com/try/download/community) installed locally or a [MongoDB Atlas](https://www.mongodb.com/atlas) account.
-- [Git](https://git-scm.com/)
+#### Prerequisites
+- [Docker](https://docs.docker.com/get-docker/) & [Docker Compose](https://docs.docker.com/compose/install/) installed
 
-### Installation
+#### Steps
 
-1.  **Clone the repository**
+1. **Clone the repository**
     ```bash
-    git clone https://github.com/yourusername/quickbite.git
-    cd quickbite
+    git clone https://github.com/kumbharrohit177-png/QuickBite-Canteen.git
+    cd QuickBite-Canteen
     ```
 
-2.  **Setup Backend**
+2. **Configure environment variables**
+
+    Create `server/.env`:
+    ```env
+    PORT=5000
+    MONGO_URI=your_mongodb_connection_string
+    JWT_SECRET=your_jwt_secret_key
+    RAZORPAY_KEY_ID=your_razorpay_key_id
+    RAZORPAY_KEY_SECRET=your_razorpay_key_secret
+    GOOGLE_CLIENT_ID=your_google_client_id
+    CLIENT_URL=http://localhost
+    ```
+
+    Create `client/.env`:
+    ```env
+    VITE_API_URL=/api
+    VITE_GOOGLE_CLIENT_ID=your_google_client_id
+    VITE_RAZORPAY_KEY_ID=your_razorpay_key_id
+    ```
+
+3. **Build and start all containers**
+    ```bash
+    docker-compose up --build
+    ```
+
+4. **Access the app**
+    | Service | URL |
+    |---|---|
+    | Frontend | http://localhost |
+    | Backend API | http://localhost:5000 |
+
+5. **Stop containers**
+    ```bash
+    docker-compose down
+    ```
+
+> 💡 Uploaded files are persisted in a Docker named volume (`uploads_data`) so they survive container restarts.
+
+---
+
+### Option 2 — Manual Setup
+
+Follow these instructions to run the project locally without Docker.
+
+#### Prerequisites
+
+- [Node.js](https://nodejs.org/) (v18 or higher)
+- [MongoDB](https://www.mongodb.com/try/download/community) locally or a [MongoDB Atlas](https://www.mongodb.com/atlas) account
+- [Git](https://git-scm.com/)
+
+#### Installation
+
+1. **Clone the repository**
+    ```bash
+    git clone https://github.com/kumbharrohit177-png/QuickBite-Canteen.git
+    cd QuickBite-Canteen
+    ```
+
+2. **Setup Backend**
     ```bash
     cd server
     npm install
     ```
-    Create a `.env` file in the `server` directory and add the following:
+    Create a `.env` file in the `server` directory:
     ```env
     PORT=5000
     MONGO_URI=your_mongodb_connection_string
@@ -76,19 +140,19 @@ Follow these instructions to get a copy of the project up and running on your lo
     ```bash
     npm run dev
     ```
-    
-    Seed the database with initial menu items (Optional but recommended):
+    Seed the database with initial menu items *(optional but recommended)*:
     ```bash
     node seed.js
     ```
 
-3.  **Setup Frontend**
+3. **Setup Frontend**
+
     Open a new terminal and navigate to the client directory:
     ```bash
     cd ../client
     npm install
     ```
-    Create a `.env` file in the `client` directory and add:
+    Create a `.env` file in the `client` directory:
     ```env
     VITE_API_URL=http://localhost:5000/api
     VITE_GOOGLE_CLIENT_ID=your_google_client_id
@@ -99,13 +163,16 @@ Follow these instructions to get a copy of the project up and running on your lo
     npm run dev
     ```
 
-4.  **Access the App**
-    Open your browser and verify the app is running at `http://localhost:5173`.
+4. **Access the App**
+
+    Open your browser at `http://localhost:5173`
+
+---
 
 ## 📂 Project Structure
 
 ```
-QuickBite/
+QuickBite-Canteen/
 ├── client/                 # Frontend React Application
 │   ├── public/             # Static assets
 │   ├── src/
@@ -117,16 +184,23 @@ QuickBite/
 │   │   ├── App.jsx         # Main App component
 │   │   └── main.jsx        # Entry point
 │   ├── .env                # Environment variables
+│   ├── .dockerignore       # Docker build exclusions
+│   ├── Dockerfile          # Docker build for frontend
+│   ├── nginx.conf          # Nginx config (serves app + proxies API)
 │   └── vite.config.js      # Vite configuration
 │
 ├── server/                 # Backend Node.js Application
 │   ├── middleware/         # Auth and error handling middleware
 │   ├── models/             # Mongoose database models
-│   ├── routes/             # API routes (Auth, Menu, Orders)
+│   ├── routes/             # API routes (Auth, Menu, Orders, Payment)
+│   ├── uploads/            # Uploaded food item images
 │   ├── .env                # Environment variables
+│   ├── .dockerignore       # Docker build exclusions
+│   ├── Dockerfile          # Docker build for backend
 │   ├── index.js            # Server entry point
 │   └── seed.js             # Database seeder script
 │
+├── docker-compose.yml      # Orchestrates all containers
 └── README.md               # Project Documentation
 ```
 
@@ -134,11 +208,11 @@ QuickBite/
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
-1.  Fork the project
-2.  Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3.  Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4.  Push to the branch (`git push origin feature/AmazingFeature`)
-5.  Open a Pull Request
+1. Fork the project
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ## 📄 License
 
@@ -146,4 +220,4 @@ This project is open source and available under the [MIT License](LICENSE).
 
 ---
 
-Developed with ❤️ by [Rohit Kumbhar,Adinath kharatmol,Subhanshu guntuka,Tanmay kadam]
+Developed with ❤️ by [Rohit Kumbhar, Adinath Kharatmol, Subhanshu Guntuka, Tanmay Kadam]
