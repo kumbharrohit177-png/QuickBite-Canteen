@@ -1,0 +1,47 @@
+version: '3.9'
+
+services:
+
+  # ─── Backend (Express + Node.js) ───────────────────────────────────────────
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: quickbite-server
+    restart: unless-stopped
+    env_file:
+      - ./server/.env
+    volumes:
+      - uploads_data:/app/uploads   # Persist uploaded images
+    ports:
+      - "5000:5000"
+    networks:
+      - quickbite-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5000/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ─── Frontend (React/Vite → Nginx) ─────────────────────────────────────────
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    container_name: quickbite-client
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - server
+    networks:
+      - quickbite-network
+
+# ─── Named Volumes ────────────────────────────────────────────────────────────
+volumes:
+  uploads_data:
+
+# ─── Networks ─────────────────────────────────────────────────────────────────
+networks:
+  quickbite-network:
+    driver: bridge
