@@ -10,9 +10,11 @@ const app = express();
 const server = http.createServer(app);
 const PORT = process.env.PORT || 5000;
 
-// Allow frontend origin from env, or all origins in dev
-const corsOrigin = process.env.CORS_ORIGIN || '*';
-
+// Clean up the CORS origin to prevent trailing slash issues
+let corsOrigin = process.env.CORS_ORIGIN || '*';
+if (corsOrigin !== '*' && corsOrigin.endsWith('/')) {
+    corsOrigin = corsOrigin.slice(0, -1);
+}
 // Socket.io Setup
 const io = new Server(server, {
     cors: {
