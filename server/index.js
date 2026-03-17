@@ -47,7 +47,12 @@ app.use('/api/admin', require('./routes/admin'));
 app.use('/api/notifications', require('./routes/notifications'));
 
 // Database Connection
-mongoose.connect(process.env.MONGO_URI)
+mongoose.set('strictQuery', false);
+mongoose.connect(process.env.MONGO_URI, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+    serverSelectionTimeoutMS: 5000 // Keep timeout short so it doesn't hang Render build
+})
     .then(() => {
         console.log('✅ MongoDB Connected Successfully');
     })
@@ -60,6 +65,7 @@ app.get('/', (req, res) => {
     res.send('QuickBite Server is Running!');
 });
 
-server.listen(PORT, () => {
+// For Render, bind to 0.0.0.0
+server.listen(PORT, '0.0.0.0', () => {
     console.log(`Server running on port ${PORT}`);
 });
