@@ -18,6 +18,7 @@ export default function MenuPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 12;
     const [menuItems, setMenuItems] = useState([]);
+    const [settings, setSettings] = useState({ isOpen: true });
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const { totalItems, totalAmount, addToCart } = useCart();
@@ -25,18 +26,24 @@ export default function MenuPage() {
     const categoryScrollRef = useRef(null);
 
     useEffect(() => {
-        const fetchMenu = async () => {
+        const fetchData = async () => {
             try {
-                const res = await api.get('/menu/all');
-                setMenuItems(res.data);
+                const [menuRes, settingsRes] = await Promise.all([
+                    api.get('/menu/all'),
+                    api.get('/admin/settings')
+                ]);
+                setMenuItems(menuRes.data);
+                if (settingsRes.data.success && settingsRes.data.settings) {
+                    setSettings(settingsRes.data.settings);
+                }
                 setLoading(false);
             } catch (err) {
-                console.error("Failed to fetch menu:", err);
-                setError("Failed to load menu. Please make sure server is running.");
+                console.error("Failed to fetch data:", err);
+                setError("Failed to load data. Please make sure server is running.");
                 setLoading(false);
             }
         };
-        fetchMenu();
+        fetchData();
     }, []);
 
     const filteredItems = menuItems.filter(item => {
@@ -353,7 +360,7 @@ export default function MenuPage() {
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 sm:gap-8">
                         {currentItems.map((item, index) => (
-                            <FoodCard key={item._id} item={item} onAdd={addToCart} index={index} />
+                            <FoodCard key={item._id} item={item} onAdd={addToCart} index={index} isOpen={settings.isOpen} />
                         ))}
                     </div>
                 )}

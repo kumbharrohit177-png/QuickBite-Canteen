@@ -2,7 +2,7 @@ import { Plus, Minus, Clock } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import toast from 'react-hot-toast';
 
-export default function FoodCard({ item, index }) {
+export default function FoodCard({ item, index, isOpen = true }) {
     const { cart, addToCart, removeFromCart, updateQuantity } = useCart();
 
     const itemId = item._id || item.id;
@@ -93,15 +93,17 @@ export default function FoodCard({ item, index }) {
                         {!quantity ? (
                             <button
                                 onClick={handleAdd}
-                                disabled={!item.available}
+                                disabled={!item.available || !isOpen}
                                 className={`
                                     relative overflow-hidden h-10 px-6 rounded-xl font-bold text-sm transition-all duration-300 flex items-center gap-2 shadow-lg shadow-primary/20
-                                    ${item.available
+                                    ${(item.available && isOpen)
                                         ? 'bg-primary text-white hover:bg-primary-hover hover:scale-105 active:scale-95'
                                         : 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none'}
                                 `}
                             >
-                                {item.available ? (
+                                {!isOpen ? (
+                                    <span>Closed</span>
+                                ) : item.available ? (
                                     <>
                                         <span>ADD</span>
                                         <Plus className="w-4 h-4" />

@@ -8,7 +8,7 @@ export default function NotificationBell() {
     const [isOpen, setIsOpen] = useState(false);
     const { user } = useAuth();
     
-    // Load dismissed notifications from local storage
+    // Load dismissed notifications from local storage and backend
     const [dismissed, setDismissed] = useState(() => {
         const saved = localStorage.getItem('dismissedNotifications');
         return saved ? JSON.parse(saved) : [];
@@ -28,22 +28,47 @@ export default function NotificationBell() {
     useEffect(() => {
         if (!user) return;
         
-        const fetchNotifications = async () => {
+        const fetchData = async () => {
             try {
-                const res = await api.get('/notifications');
-                if (res.data.success) {
-                    setNotifications(res.data.notifications);
+                const [notifRes, dismissedRes] = await Promise.all([
+                    api.get('/notifications'),
+                    api.get('/notifications/dismissed').catch(() => ({ data: { dismissed: [] } }))
+                ]);
+
+                if (notifRes.data.success) {
+                    setNotifications(notifRes.data.notifications);
                 }
+
+                // Merge local and remote dismissed
+                if (dismissedRes.data && dismissedRes.data.dismissed) {
+                    const localSaved = localStorage.getItem('dismissedNotifications');
+                    const localDismissed = localSaved ? JSON.parse(localSaved) : [];
+                    const merged = [...new Set([...localDismissed, ...dismissedRes.data.dismissed])];
+                    setDismissed(merged);
+                    localStorage.setItem('dismissedNotifications', JSON.stringify(merged));
+                }
+
             } catch (error) {
                 console.error('Failed to load notifications', error);
             }
         };
-        fetchNotifications();
+        fetchData();
     }, [user]);
 
     // Derived state: Active notifications
     const activeNotifications = notifications.filter(n => !dismissed.includes(n._id));
     const unreadCount = activeNotifications.length;
+
+    const syncDismissedWithServer = async (newDismissed) => {
+        if (user) {
+            try {
+                // Fire and forget
+                api.post('/notifications/dismiss', { dismissedIds: newDismissed });
+            } catch (err) {
+                console.error('Failed to sync dismissed notifications', err);
+            }
+        }
+    };
 
     const handleDismiss = (id, e) => {
         if (e) e.stopPropagation();
@@ -54,6 +79,7 @@ export default function NotificationBell() {
             setDismissed(newDismissed);
             localStorage.setItem('dismissedNotifications', JSON.stringify(newDismissed));
             window.dispatchEvent(new Event('notifications_updated'));
+            syncDismissedWithServer(newDismissed);
         }
     };
 
@@ -65,6 +91,7 @@ export default function NotificationBell() {
         setDismissed(newDismissed);
         localStorage.setItem('dismissedNotifications', JSON.stringify(newDismissed));
         window.dispatchEvent(new Event('notifications_updated'));
+        syncDismissedWithServer(newDismissed);
     };
     
     if (!user) return null;

@@ -35,12 +35,18 @@ router.get('/test-emit', (req, res) => {
     res.status(500).json({ msg: 'Socket IO not found' });
 });
 
-// @route   POST /api/orders
-// @desc    Place a new order
+const Settings = require('../models/Settings');
+
 // @route   POST /api/orders
 // @desc    Place a new order
 router.post('/', auth, async (req, res) => {
     try {
+        // Enforce Canteen Open Policy
+        const settings = await Settings.findOne();
+        if (settings && !settings.isOpen) {
+            return res.status(400).json({ msg: 'The canteen is currently closed. We are not accepting new orders.' });
+        }
+
         const { items, totalAmount, pickupSlot, instructions } = req.body; // Remove user from body, use req.user.id
 
         // Generate a simple token number (e.g., last 4 digits of timestamp + random)

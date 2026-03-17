@@ -22,6 +22,7 @@ export default function CartPage() {
     const [instructions, setInstructions] = useState('');
     const [couponCode, setCouponCode] = useState('');
     const [taxPercentage, setTaxPercentage] = useState(5);
+    const [isOpen, setIsOpen] = useState(true);
 
     useEffect(() => {
         const fetchSettings = async () => {
@@ -29,6 +30,7 @@ export default function CartPage() {
                 const res = await api.get('/admin/settings');
                 if (res.data.success && res.data.settings) {
                     setTaxPercentage(res.data.settings.taxPercentage || 0);
+                    setIsOpen(res.data.settings.isOpen);
                 }
             } catch (err) {
                 console.error("Failed to load settings:", err);
@@ -436,14 +438,14 @@ export default function CartPage() {
                             <div className="space-y-3">
                                 <button
                                     onClick={handleProceedToPay}
-                                    disabled={!selectedSlot || loading}
+                                    disabled={!selectedSlot || loading || !isOpen}
                                     className={`w-full py-4 rounded-xl font-bold text-lg shadow-lg flex items-center justify-center gap-2 transition-transform active:scale-95
-                                        ${selectedSlot && !loading
+                                        ${(selectedSlot && !loading && isOpen)
                                             ? 'bg-primary text-white hover:bg-orange-600'
                                             : 'bg-gray-100 text-gray-400 cursor-not-allowed'}
                                     `}
                                 >
-                                    {loading ? <Loader className="w-5 h-5 animate-spin" /> : 'Proceed to Checkout'}
+                                    {loading ? <Loader className="w-5 h-5 animate-spin" /> : (!isOpen ? 'Canteen Closed' : 'Proceed to Checkout')}
                                 </button>
 
                                 <Link to="/menu" className="block w-full py-3 text-center text-gray-500 font-bold border-2 border-gray-100 rounded-xl hover:border-gray-300 hover:text-gray-700 transition-colors">
@@ -457,6 +459,12 @@ export default function CartPage() {
                                     <span className="font-bold">Cancellation Policy:</span> Help us reduce food waste by avoiding cancellations after placing your order. A 100% cancellation fee will be applied.
                                 </p>
                             </div>
+
+                            {!isOpen && (
+                                <p className="text-xs text-center text-red-500 mt-4 bg-red-50 py-2 rounded-lg font-bold">
+                                    ⚠️ The canteen is currently closed.
+                                </p>
+                            )}
 
                             {!selectedSlot && (
                                 <p className="text-xs text-center text-red-500 mt-4 bg-red-50 py-2 rounded-lg">

@@ -86,7 +86,17 @@ export default function Settings() {
                                 type="checkbox"
                                 name="isOpen"
                                 checked={settings.isOpen}
-                                onChange={handleChange}
+                                onChange={async (e) => {
+                                    const newValue = e.target.checked;
+                                    setSettings(prev => ({ ...prev, isOpen: newValue }));
+                                    try {
+                                        await api.put('/admin/settings', { ...settings, isOpen: newValue });
+                                        toast.success(`Canteen is now ${newValue ? 'Accepting Orders' : 'Closed'}`);
+                                    } catch (error) {
+                                        toast.error('Failed to update status');
+                                        setSettings(prev => ({ ...prev, isOpen: !newValue })); // Revert on failure
+                                    }
+                                }}
                                 className="sr-only peer"
                             />
                             <div className="w-14 h-7 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-green-500"></div>
