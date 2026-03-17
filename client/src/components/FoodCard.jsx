@@ -36,7 +36,7 @@ export default function FoodCard({ item, index, isOpen = true }) {
                 <img
                     src={item.image || "https://images.unsplash.com/photo-1546069901-ba9599a7e63c?auto=format&fit=crop&q=80&w=600"}
                     alt={item.name}
-                    className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700"
+                    className={`w-full h-full object-cover transform transition-transform duration-700 ${!item.available ? 'grayscale' : 'group-hover:scale-110'}`}
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-60" />
 
@@ -63,7 +63,7 @@ export default function FoodCard({ item, index, isOpen = true }) {
             </div>
 
             {/* Content */}
-            <div className="p-5 flex flex-col flex-grow relative">
+            <div className={`p-5 flex flex-col flex-grow relative ${!item.available ? 'opacity-70' : ''}`}>
                 <div className="flex-grow">
                     <div className="flex justify-between items-start mb-2">
                         <h3 className="text-lg font-bold text-gray-900 leading-tight group-hover:text-primary transition-colors">
@@ -95,10 +95,10 @@ export default function FoodCard({ item, index, isOpen = true }) {
                                 onClick={handleAdd}
                                 disabled={!item.available || !isOpen}
                                 className={`
-                                    relative overflow-hidden h-10 px-6 rounded-xl font-bold text-sm transition-all duration-300 flex items-center gap-2 shadow-lg shadow-primary/20
+                                    relative overflow-hidden h-10 px-6 rounded-xl font-bold text-sm transition-all duration-300 flex items-center gap-2 shadow-lg shadow-primary/20 whitespace-nowrap
                                     ${(item.available && isOpen)
                                         ? 'bg-primary text-white hover:bg-primary-hover hover:scale-105 active:scale-95'
-                                        : 'bg-gray-100 text-gray-400 cursor-not-allowed shadow-none'}
+                                        : 'bg-gray-100 text-gray-500 cursor-not-allowed shadow-none'}
                                 `}
                             >
                                 {!isOpen ? (
@@ -109,7 +109,7 @@ export default function FoodCard({ item, index, isOpen = true }) {
                                         <Plus className="w-4 h-4" />
                                     </>
                                 ) : (
-                                    <span>Out of Stock</span>
+                                    <span className="text-xs">Currently Unavailable</span>
                                 )}
                             </button>
                         ) : (
