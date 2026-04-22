@@ -6,7 +6,8 @@ import {
     MagnifyingGlassIcon,
     PrinterIcon,
     ChevronDownIcon,
-    ExclamationTriangleIcon
+    ExclamationTriangleIcon,
+    QueueListIcon
 } from '@heroicons/react/24/outline';
 
 export default function Orders() {
@@ -14,6 +15,9 @@ export default function Orders() {
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [filterStatus, setFilterStatus] = useState('All');
+    const [filterPayment, setFilterPayment] = useState('All');
+    const [filterItem, setFilterItem] = useState('All');
+    const [selectedOrders, setSelectedOrders] = useState([]);
 
     const fetchOrders = async () => {
         try {
@@ -73,6 +77,18 @@ export default function Orders() {
         }
     };
 
+    const handleBulkUpdate = async (newStatus) => {
+        if (selectedOrders.length === 0) return;
+        try {
+            await Promise.all(selectedOrders.map(id => api.put(`/orders/${id}/status`, { status: newStatus })));
+            toast.success(`${selectedOrders.length} orders marked as ${newStatus}`);
+            setOrders(orders.map(o => selectedOrders.includes(o._id) ? { ...o, status: newStatus } : o));
+            setSelectedOrders([]);
+        } catch (error) {
+            toast.error('Failed to bulk update status');
+        }
+    };
+
     const handlePrint = (order) => {
         // Basic print bill functionality
         const printWindow = window.open('', '', 'width=600,height=800');
@@ -123,12 +139,16 @@ export default function Orders() {
     };
 
     // Derived filtered data
+    const uniqueFoodItems = [...new Set(orders.flatMap(o => o.items.map(i => i.name)))].sort();
+
     const filteredOrders = orders.filter(o => {
         const matchesSearch =
             o.tokenNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
             (o.user?.name || '').toLowerCase().includes(searchTerm.toLowerCase());
         const matchesStatus = filterStatus === 'All' || o.status === filterStatus;
-        return matchesSearch && matchesStatus;
+        const matchesPayment = filterPayment === 'All' || o.paymentStatus === filterPayment;
+        const matchesItem = filterItem === 'All' || o.items.some(i => i.name === filterItem);
+        return matchesSearch && matchesStatus && matchesPayment && matchesItem;
     });
 
     const statusColors = {
@@ -159,6 +179,26 @@ export default function Orders() {
                         />
                     </div>
                     <select
+                        value={filterPayment}
+                        onChange={(e) => setFilterPayment(e.target.value)}
+                        className="py-2 pl-3 pr-10 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    >
+                        <option value="All">All Payments</option>
+                        <option value="Paid">Paid</option>
+                        <option value="Pending">Pending</option>
+                        <option value="Failed">Failed</option>
+                    </select>
+                    <select
+                        value={filterItem}
+                        onChange={(e) => setFilterItem(e.target.value)}
+                        className="py-2 pl-3 pr-8 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500 max-w-[150px] truncate"
+                    >
+                        <option value="All">All Food Items</option>
+                        {uniqueFoodItems.map(item => (
+                            <option key={item} value={item}>{item}</option>
+                        ))}
+                    </select>
+                    <select
                         value={filterStatus}
                         onChange={(e) => setFilterStatus(e.target.value)}
                         className="py-2 pl-3 pr-10 border border-gray-300 bg-white rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
@@ -172,6 +212,25 @@ export default function Orders() {
                     </select>
                 </div>
             </div>
+
+            {selectedOrders.length > 0 && (
+                <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 flex flex-col sm:flex-row items-center justify-between animate-fade-in">
+                    <span className="text-orange-800 font-medium text-sm mb-2 sm:mb-0">
+                        {selectedOrders.length} order(s) selected
+                    </span>
+                    <div className="flex gap-2">
+                        {['Pending', 'Preparing', 'Ready', 'Collected', 'Cancelled'].map(s => (
+                            <button
+                                key={s}
+                                onClick={() => handleBulkUpdate(s)}
+                                className="px-3 py-1.5 text-xs font-semibold bg-white border border-gray-300 rounded-lg hover:bg-gray-50 text-gray-700 shadow-sm transition-colors"
+                            >
+                                Mark {s}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {loading ? (
                 <div className="flex justify-center py-20">Loading orders...</div>
@@ -187,6 +246,15 @@ export default function Orders() {
                         <table className="min-w-full divide-y divide-gray-200">
                             <thead className="bg-gray-50">
                                 <tr>
+                                    <th className="px-6 py-3 text-left">
+                                        <input
+                                            type="checkbox"
+                                            checked={filteredOrders.length > 0 && selectedOrders.length === filteredOrders.length}
+                                            onChange={(e) => setSelectedOrders(e.target.checked ? filteredOrders.map(o => o._id) : [])}
+                                            className="rounded text-orange-500 focus:ring-orange-500 cursor-pointer h-4 w-4"
+                                            title="Select All"
+                                        />
+                                    </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Token</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Items</th>
@@ -197,7 +265,18 @@ export default function Orders() {
                             </thead>
                             <tbody className="bg-white divide-y divide-gray-200">
                                 {filteredOrders.map((order) => (
-                                    <tr key={order._id} className="hover:bg-gray-50 transition-colors">
+                                    <tr key={order._id} className={`hover:bg-gray-50 transition-colors ${selectedOrders.includes(order._id) ? 'bg-orange-50/40' : ''}`}>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedOrders.includes(order._id)}
+                                                onChange={(e) => {
+                                                    if (e.target.checked) setSelectedOrders([...selectedOrders, order._id]);
+                                                    else setSelectedOrders(selectedOrders.filter(id => id !== order._id));
+                                                }}
+                                                className="rounded text-orange-500 focus:ring-orange-500 cursor-pointer h-4 w-4"
+                                            />
+                                        </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <div className="font-bold text-gray-900">#{order.tokenNumber}</div>
                                             <div className="text-sm text-gray-500">{new Date(order.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>

@@ -14,6 +14,9 @@ export default function Menu() {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
+    const [filterCategory, setFilterCategory] = useState('All');
+    const [filterStock, setFilterStock] = useState('All');
+    const [filterType, setFilterType] = useState('All');
 
     // Modal state for Add/Edit
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -119,15 +122,20 @@ export default function Menu() {
         }
     };
 
-    const filteredItems = items.filter(item =>
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.category.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
     const categories = [...new Set(items.map(i => i.category))];
     if (!categories.includes('Snacks')) categories.push('Snacks');
     if (!categories.includes('Meals')) categories.push('Meals');
     if (!categories.includes('Drinks')) categories.push('Drinks');
+
+    const filteredItems = items.filter(item => {
+        const matchesSearch = item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                              item.category.toLowerCase().includes(searchTerm.toLowerCase());
+        const matchesCategory = filterCategory === 'All' || item.category === filterCategory;
+        const matchesStock = filterStock === 'All' ? true : filterStock === 'In Stock' ? item.available : !item.available;
+        const matchesType = filterType === 'All' ? true : filterType === 'Veg' ? item.isVeg : !item.isVeg;
+        
+        return matchesSearch && matchesCategory && matchesStock && matchesType;
+    });
 
     return (
         <div className="space-y-6 animate-fade-in relative">
@@ -145,15 +153,57 @@ export default function Menu() {
                 </button>
             </div>
 
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex items-center">
-                <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 mr-3" />
-                <input
-                    type="text"
-                    placeholder="Search dishes or categories..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full outline-none text-gray-700 bg-transparent"
-                />
+            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col gap-4">
+                <div className="flex items-center">
+                    <MagnifyingGlassIcon className="h-5 w-5 text-gray-400 mr-3" />
+                    <input
+                        type="text"
+                        placeholder="Search dishes or categories..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full outline-none text-gray-700 bg-transparent"
+                    />
+                </div>
+                
+                {/* Advanced Filters */}
+                <div className="flex flex-wrap gap-4 pt-3 border-t border-gray-50 flex-col sm:flex-row sm:items-center">
+                    <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <span className="text-sm text-gray-500 font-medium">Category:</span>
+                        <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
+                            {['All', ...categories].map(cat => (
+                                <button
+                                    key={cat}
+                                    onClick={() => setFilterCategory(cat)}
+                                    className={`px-3 py-1 text-sm rounded-full whitespace-nowrap transition-colors ${filterCategory === cat ? 'bg-orange-100 text-orange-700 font-medium border border-orange-200' : 'bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100'}`}
+                                >
+                                    {cat}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                    
+                    <div className="flex items-center gap-3 w-full sm:w-auto sm:border-l sm:border-gray-200 sm:pl-4">
+                        <select
+                            value={filterStock}
+                            onChange={(e) => setFilterStock(e.target.value)}
+                            className="py-1 pl-2 pr-6 text-sm border border-gray-200 bg-gray-50 rounded-lg focus:ring-1 focus:ring-orange-500 focus:border-orange-500 text-gray-600 outline-none cursor-pointer"
+                        >
+                            <option value="All">All Stock Status</option>
+                            <option value="In Stock">In Stock</option>
+                            <option value="Out of Stock">Out of Stock</option>
+                        </select>
+
+                        <select
+                            value={filterType}
+                            onChange={(e) => setFilterType(e.target.value)}
+                            className="py-1 pl-2 pr-6 text-sm border border-gray-200 bg-gray-50 rounded-lg focus:ring-1 focus:ring-orange-500 focus:border-orange-500 text-gray-600 outline-none cursor-pointer"
+                        >
+                            <option value="All">All Types</option>
+                            <option value="Veg">Vegetarian</option>
+                            <option value="Non-Veg">Non-Veg</option>
+                        </select>
+                    </div>
+                </div>
             </div>
 
             {loading ? (
