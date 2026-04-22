@@ -184,6 +184,13 @@ export default function CartPage() {
                 theme: {
                     color: "#F97316" // Primary Orange
                 },
+                method: {
+                    upi: true,
+                    card: true,
+                    netbanking: true,
+                    wallet: true,
+                    emi: false
+                },
                 modal: {
                     ondismiss: function () {
                         setLoading(false);
